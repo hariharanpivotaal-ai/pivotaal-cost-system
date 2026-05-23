@@ -275,49 +275,61 @@ function updateWeekBadge(dateStr) {
 // ══════════════════════════════════════
 async function loadOrders() {
   try {
-    const resp = await fetch(SCRIPT_URL + '?action=orders');
-    const data = await resp.json();
+    // Load orders AND master data together
+    const [ordResp, masterResp] = await Promise.all([
+      fetch(SCRIPT_URL + '?action=orders'),
+      fetch(SCRIPT_URL + '?action=masters'),
+    ]);
+    const ordData    = await ordResp.json();
+    const masterData = await masterResp.json();
 
-    // Filter active orders only
-    orders = data.filter(function(o){ return o.Status === 'Active'; });
-
+    // Populate orders
+    orders = ordData.filter(function(o){ return o.Status === 'Active'; });
     const sel = document.getElementById('f-order');
     sel.innerHTML = '<option value="">— select order —</option>';
-
     orders.forEach(function(o) {
-      const orderNo = o.OrderNo || '';
-      const group   = o.GroupOrderNo || '';
-      const client  = o.Client || '';
-      const style   = o.Style || '';
-      // Show: OrderNo — Client — Style
-      const label   = orderNo +
-        (client ? ' — ' + client : '') +
-        (style  ? ' — ' + style  : '');
+      const label = (o.OrderNo||'') +
+        (o.Client ? ' — ' + o.Client : '') +
+        (o.Style  ? ' — ' + o.Style  : '');
       const opt = document.createElement('option');
       opt.value = label;
       opt.textContent = label;
       sel.appendChild(opt);
     });
-
-    // Show order count hint
     document.getElementById('orderHint').textContent =
       orders.length + ' active orders loaded';
+
+    // Populate contractors LIVE from MasterData
+    const conSel = document.getElementById('f-contractor');
+    conSel.innerHTML = '<option value="">— select —</option>';
+    (masterData.contractors || []).forEach(function(name) {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      conSel.appendChild(opt);
+    });
+
+    // Populate entered by LIVE from MasterData
+    const bySel = document.getElementById('f-enteredby');
+    bySel.innerHTML = '<option value="">— select —</option>';
+    (masterData.teamMembers || []).forEach(function(name) {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      bySel.appendChild(opt);
+    });
 
     document.getElementById('loadingState').style.display = 'none';
     document.getElementById('formArea').style.display = 'block';
 
   } catch(err) {
-    // Offline fallback — show form with cached or empty orders
     document.getElementById('loadingState').style.display = 'none';
     document.getElementById('formArea').style.display = 'block';
-    const sel = document.getElementById('f-order');
-    sel.innerHTML = '<option value="">— enter order no manually —</option>';
-    document.getElementById('orderHint').textContent =
-      'Could not load orders — type order no in notes';
     document.getElementById('offlineBar').style.display = 'flex';
+    document.getElementById('orderHint').textContent =
+      'Could not load — check internet connection';
   }
 }
-
 // ══════════════════════════════════════
 // QUICK QTY CHIPS
 // ══════════════════════════════════════
