@@ -310,8 +310,8 @@ function updateWeekBadge(dateStr) {
 // ── LOAD DATA ────────────────────────────────────────────
 async function loadData() {
   try {
-    var mRes = await fetch(SCRIPT_URL+'?action=masters');
-    var oRes = await fetch(SCRIPT_URL+'?action=orders');
+    var mRes = await fetch(SCRIPT_URL+'?action=masters', {redirect:'follow'});
+var oRes = await fetch(SCRIPT_URL+'?action=orders',  {redirect:'follow'});
     masterData = await mRes.json();
     var orders = await oRes.json();
 
@@ -431,7 +431,7 @@ async function loadCutQty(idx) {
   badge.style.display = 'inline-block';
 
   try {
-    var res  = await fetch(SCRIPT_URL+'?action=cutqty&contractor='+encodeURIComponent(contractor)+'&order='+encodeURIComponent(orderLabel));
+    var res = await fetch(SCRIPT_URL+'?action=cutqty&contractor='+encodeURIComponent(contractor)+'&order='+encodeURIComponent(orderLabel), {redirect:'follow'});
     var data = await res.json();
     var qty  = data.cutQty || 0;
     badge.textContent = 'Cut qty: '+qty+' pcs';
