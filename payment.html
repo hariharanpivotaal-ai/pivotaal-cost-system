@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#D85A30">
+<title>Pivotaal — Payment Entry</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#1D9E75;--teal-d:#0F6E56;--teal-l:#E1F5EE;
+  --coral:#D85A30;--coral-d:#B8431F;--coral-l:#FAECE7;
+  --amber:#BA7517;--amber-l:#FAEEDA;
+  --blue:#185FA5;--blue-l:#E6F1FB;
+  --text:#1C1C1A;--text2:#6B6A66;--text3:#9B9A96;
+  --bg:#F4F7F5;--surface:#fff;
+  --border:#DDE8E4;--radius:16px;--radius-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:40px}
+.header{background:linear-gradient(135deg,var(--coral-d) 0%,var(--coral) 100%);padding:20px 20px 28px;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,.06);border-radius:50%}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;position:relative;z-index:1}
+.logo{width:38px;height:38px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
+.header-date{font-size:12px;color:rgba(255,255,255,.75);font-weight:500}
+.header-title{font-size:22px;font-weight:700;color:#fff;position:relative;z-index:1}
+.header-sub{font-size:13px;color:rgba(255,255,255,.7);margin-top:3px;position:relative;z-index:1}
+.body{padding:20px 16px}
+.loading{text-align:center;padding:40px 20px}
+.spinner{width:36px;height:36px;border:3px solid var(--coral-l);border-top-color:var(--coral);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--text3)}
+.card{background:var(--surface);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.card-title{font-size:11px;font-weight:700;color:var(--coral);letter-spacing:.8px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:6px}
+.card-title::before{content:'';width:3px;height:14px;background:var(--coral);border-radius:2px;display:inline-block}
+.fg{margin-bottom:16px}.fg:last-child{margin-bottom:0}
+.fl{font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:7px}
+.req{color:var(--coral);margin-left:2px}
+.fi,.fs{width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:16px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surface);-webkit-appearance:none}
+.fi:focus,.fs:focus{outline:none;border-color:var(--coral);box-shadow:0 0 0 3px rgba(216,90,48,.1)}
+.fi.error,.fs.error{border-color:var(--coral)}
+.fhint{font-size:11px;color:var(--text3);margin-top:5px}
+.field-err{font-size:11px;color:var(--coral);margin-top:4px;display:none}
+.num-wrap{position:relative}
+.num-wrap .fi{padding-left:36px;font-size:22px;font-weight:700;font-family:'DM Mono',monospace}
+.num-rupee{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--text3);font-weight:600;pointer-events:none}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.week-badge{display:inline-block;background:var(--coral-l);color:var(--coral-d);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;margin-top:6px}
+.cond-field{display:none}
+.cond-field.show{display:block}
+.submit-btn{width:100%;padding:17px;background:linear-gradient(135deg,var(--coral) 0%,var(--coral-d) 100%);color:#fff;border:none;border-radius:var(--radius-sm);font-size:16px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(184,67,31,.25)}
+.submit-btn:active{transform:scale(.97)}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed}
+#successScreen{display:none;text-align:center;padding:40px 20px}
+.success-icon{width:72px;height:72px;background:var(--teal-l);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px}
+.success-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.success-sub{font-size:14px;color:var(--text2);margin-bottom:8px}
+.success-detail{background:var(--coral-l);border-radius:var(--radius-sm);padding:14px;margin:16px 0;text-align:left}
+.sd-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid rgba(216,90,48,.12)}
+.sd-row:last-child{border-bottom:none}
+.sd-label{color:var(--coral-d);font-weight:500}
+.sd-val{font-weight:600;font-family:'DM Mono',monospace}
+.new-btn{width:100%;padding:15px;background:var(--surface);color:var(--coral);border:2px solid var(--coral);border-radius:var(--radius-sm);font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:12px}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1C1C1A;color:#fff;padding:11px 22px;border-radius:22px;font-size:13px;font-weight:600;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">PB</div>
+    <div class="header-date" id="headerDate"></div>
+  </div>
+  <div class="header-title">Payment Entry</div>
+  <div class="header-sub">Pivotaal Branding Solutions</div>
+</div>
+
+<div class="body">
+  <div id="loadingState" class="loading"><div class="spinner"></div><div class="loading-text">Loading...</div></div>
+
+  <div id="formArea" style="display:none">
+
+    <div class="card">
+      <div class="card-title">Payment details</div>
+
+      <div class="fg">
+        <label class="fl">Date <span class="req">*</span></label>
+        <input type="date" class="fi" id="f-date">
+        <div class="week-badge" id="weekBadge"></div>
+      </div>
+
+      <div class="fg">
+        <label class="fl">Payment type <span class="req">*</span></label>
+        <select class="fs" id="f-paytype" onchange="onTypeChange()">
+          <option value="">— select —</option>
+        </select>
+        <div class="field-err" id="err-paytype">Required</div>
+      </div>
+
+      <div class="fg">
+        <label class="fl">Paid to / Party <span class="req">*</span></label>
+        <input type="text" class="fi" id="f-party" placeholder="Vendor or contractor name" list="partyList">
+        <datalist id="partyList"></datalist>
+        <div class="field-err" id="err-party">Required</div>
+      </div>
+
+      <div class="fg">
+        <label class="fl">Amount <span class="req">*</span></label>
+        <div class="num-wrap">
+          <span class="num-rupee">₹</span>
+          <input type="number" class="fi" id="f-amount" placeholder="0" inputmode="numeric">
+        </div>
+        <div class="field-err" id="err-amount">Required</div>
+      </div>
+
+      <div class="fg">
+        <label class="fl">Payment mode <span class="req">*</span></label>
+        <select class="fs" id="f-mode">
+          <option value="">— select —</option>
+        </select>
+        <div class="field-err" id="err-mode">Required</div>
+      </div>
+    </div>
+
+    <!-- CONDITIONAL: Order tagging (for expenses / advances against order) -->
+    <div class="card cond-field" id="orderCard">
+      <div class="card-title">Tag to order</div>
+      <div class="fg">
+        <label class="fl" id="orderLabel">Order no</label>
+        <select class="fs" id="f-order">
+          <option value="">— select order (optional) —</option>
+        </select>
+        <div class="fhint">Tag if this payment belongs to a specific order</div>
+      </div>
+    </div>
+
+    <!-- CONDITIONAL: Expense category -->
+    <div class="card cond-field" id="expenseCard">
+      <div class="card-title">Expense category</div>
+      <div class="fg">
+        <label class="fl">Category</label>
+        <select class="fs" id="f-expcat">
+          <option value="">— select —</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Reference</div>
+      <div class="fg">
+        <label class="fl">Reference no (optional)</label>
+        <input type="text" class="fi" id="f-ref" placeholder="UTR / cheque / txn id">
+      </div>
+      <div class="fg">
+        <label class="fl">Entered by <span class="req">*</span></label>
+        <select class="fs" id="f-enteredby">
+          <option value="">— select —</option>
+        </select>
+        <div class="field-err" id="err-enteredby">Required</div>
+      </div>
+      <div class="fg">
+        <label class="fl">Notes (optional)</label>
+        <input type="text" class="fi" id="f-notes" placeholder="Any note">
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitPayment()">Save payment</button>
+  </div>
+
+  <div id="successScreen">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Payment saved!</div>
+    <div class="success-sub">Kavya will verify this entry.</div>
+    <div class="success-detail" id="successDetail"></div>
+    <button class="new-btn" onclick="resetForm()">+ New payment</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMJUO-eXiq-2LrSZWELtTeEvGw-Ev2_XkH2vcKltKAGfva8qNkVDDNUL6FO8STH_Eubg/exec';
+const SECRET = 'pivotaal2025xyz';
+
+var master = {};
+var groupOrders = [];
+
+function fetchData(action, params) {
+  return new Promise(function(resolve, reject) {
+    var cb = 'cb_'+action+'_'+Date.now()+'_'+Math.floor(Math.random()*100000);
+    var script = document.createElement('script');
+    var url = SCRIPT_URL+'?key='+SECRET+'&action='+action+'&callback='+cb;
+    if (params) Object.keys(params).forEach(function(k){ url+='&'+k+'='+encodeURIComponent(params[k]); });
+    var cleanup=function(){ try{ if(script&&script.parentNode) script.parentNode.removeChild(script); }catch(e){} };
+    window[cb]=function(data){ try{delete window[cb];}catch(e){window[cb]=undefined;} cleanup(); resolve(data); };
+    script.onerror=function(){ try{delete window[cb];}catch(e){window[cb]=undefined;} cleanup(); reject(new Error('Failed')); };
+    script.src=url;
+    (document.head||document.documentElement).appendChild(script);
+    setTimeout(function(){ if(window[cb]){ try{delete window[cb];}catch(e){window[cb]=undefined;} cleanup(); reject(new Error('Timeout')); } },15000);
+  });
+}
+
+window.addEventListener('load', function() {
+  var t = new Date().toISOString().slice(0,10);
+  document.getElementById('f-date').value = t;
+  document.getElementById('headerDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'});
+  updateWeek(t);
+  document.getElementById('f-date').addEventListener('change', function(){ updateWeek(this.value); });
+  loadWithRetry();
+});
+
+function updateWeek(d){
+  if(!d)return; var dt=new Date(d),j=new Date(dt.getFullYear(),0,1);
+  var wk=Math.ceil(((dt-j)/86400000+j.getDay()+1)/7);
+  document.getElementById('weekBadge').textContent='Week '+wk+' — '+dt.getFullYear();
+}
+
+async function loadWithRetry(n){
+  n=n||1;
+  try { await loadData(); }
+  catch(e){ if(n<4) setTimeout(function(){loadWithRetry(n+1);},1500);
+    else document.getElementById('loadingState').innerHTML='<div style="color:var(--coral);text-align:center">Could not load. Refresh page.</div>'; }
+}
+
+async function loadData() {
+  master = await fetchData('masters');
+  groupOrders = await fetchData('grouporders');
+
+  // Payment types
+  var pt = document.getElementById('f-paytype');
+  pt.innerHTML='<option value="">— select —</option>';
+  (master.paymentTypes||['Vendor payment','Direct expense','Indirect expense','Labour advance','Labour settlement','Advance to vendor','Other']).forEach(function(n){ var o=document.createElement('option');o.value=n;o.textContent=n;pt.appendChild(o); });
+
+  // Payment modes
+  var pm = document.getElementById('f-mode');
+  pm.innerHTML='<option value="">— select —</option>';
+  (master.paymentModes||[]).forEach(function(n){ var o=document.createElement('option');o.value=n;o.textContent=n;pm.appendChild(o); });
+
+  // Entered by
+  var eb = document.getElementById('f-enteredby');
+  eb.innerHTML='<option value="">— select —</option>';
+  (master.teamMembers||[]).forEach(function(n){ var o=document.createElement('option');o.value=n;o.textContent=n;eb.appendChild(o); });
+
+  // Expense category
+  var ec = document.getElementById('f-expcat');
+  ec.innerHTML='<option value="">— select —</option>';
+  (master.expenseCategories||[]).forEach(function(n){ var o=document.createElement('option');o.value=n;o.textContent=n;ec.appendChild(o); });
+
+  // Party suggestions (contractors)
+  var dl = document.getElementById('partyList');
+  dl.innerHTML='';
+  (master.contractors||[]).forEach(function(n){ var o=document.createElement('option');o.value=n;dl.appendChild(o); });
+
+  // Order dropdown
+  var od = document.getElementById('f-order');
+  od.innerHTML='<option value="">— select order (optional) —</option>';
+  groupOrders.forEach(function(label){ var o=document.createElement('option');o.value=label;o.textContent=label;od.appendChild(o); });
+
+  document.getElementById('loadingState').style.display='none';
+  document.getElementById('formArea').style.display='block';
+}
+
+// Show/hide conditional fields based on payment type
+function onTypeChange() {
+  var type = document.getElementById('f-paytype').value;
+  var orderCard = document.getElementById('orderCard');
+  var expenseCard = document.getElementById('expenseCard');
+
+  // Expense → show expense category + order tagging
+  if (type==='Direct expense' || type==='Indirect expense') {
+    expenseCard.classList.add('show');
+    orderCard.classList.add('show');
+    document.getElementById('orderLabel').textContent = 'Tag to order (for direct expense)';
+  }
+  // Advances / vendor payment → show order tagging only
+  else if (type==='Labour advance' || type==='Advance to vendor' || type==='Vendor payment') {
+    expenseCard.classList.remove('show');
+    orderCard.classList.add('show');
+    document.getElementById('orderLabel').textContent = 'Tag to order (optional)';
+  }
+  else {
+    expenseCard.classList.remove('show');
+    orderCard.classList.remove('show');
+  }
+}
+
+function validate() {
+  var valid=true;
+  ['f-paytype','f-party','f-amount','f-mode','f-enteredby'].forEach(function(id){
+    var el=document.getElementById(id);
+    var err=document.getElementById('err-'+id.replace('f-',''));
+    if(!el.value){ el.classList.add('error'); if(err)err.style.display='block'; valid=false; }
+    else { el.classList.remove('error'); if(err)err.style.display='none'; }
+  });
+  if((parseFloat(document.getElementById('f-amount').value)||0)<=0){
+    document.getElementById('f-amount').classList.add('error');
+    document.getElementById('err-amount').style.display='block'; valid=false;
+  }
+  return valid;
+}
+
+async function submitPayment() {
+  if(!validate()) return;
+  var btn=document.getElementById('submitBtn');
+  btn.disabled=true; btn.textContent='Saving...';
+
+  var data = {
+    date:           document.getElementById('f-date').value,
+    paymentType:    document.getElementById('f-paytype').value,
+    party:          document.getElementById('f-party').value,
+    amount:         parseFloat(document.getElementById('f-amount').value)||0,
+    paymentMode:    document.getElementById('f-mode').value,
+    paymentAgainst: document.getElementById('f-order').value||'',
+    expenseCategory:document.getElementById('f-expcat').value||'',
+    referenceNo:    document.getElementById('f-ref').value||'',
+    enteredBy:      document.getElementById('f-enteredby').value,
+    notes:          document.getElementById('f-notes').value||'',
+  };
+
+  try {
+    await fetch(SCRIPT_URL, {method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:SECRET,type:'payment',data:data})});
+    showSuccess(data);
+  } catch(e) {
+    showToast('Error, try again'); btn.disabled=false; btn.textContent='Save payment';
+  }
+}
+
+function showSuccess(d) {
+  document.getElementById('formArea').style.display='none';
+  document.getElementById('successScreen').style.display='block';
+  var html='';
+  html+='<div class="sd-row"><span class="sd-label">Date</span><span class="sd-val">'+d.date+'</span></div>';
+  html+='<div class="sd-row"><span class="sd-label">Type</span><span class="sd-val">'+d.paymentType+'</span></div>';
+  html+='<div class="sd-row"><span class="sd-label">Paid to</span><span class="sd-val">'+d.party+'</span></div>';
+  html+='<div class="sd-row"><span class="sd-label">Amount</span><span class="sd-val">₹'+Math.round(d.amount).toLocaleString('en-IN')+'</span></div>';
+  html+='<div class="sd-row"><span class="sd-label">Mode</span><span class="sd-val">'+d.paymentMode+'</span></div>';
+  if(d.paymentAgainst) html+='<div class="sd-row"><span class="sd-label">Order</span><span class="sd-val">'+d.paymentAgainst.split('—')[0].trim()+'</span></div>';
+  if(d.expenseCategory) html+='<div class="sd-row"><span class="sd-label">Category</span><span class="sd-val">'+d.expenseCategory+'</span></div>';
+  html+='<div class="sd-row"><span class="sd-label">Status</span><span class="sd-val" style="color:var(--amber)">Pending verify</span></div>';
+  document.getElementById('successDetail').innerHTML=html;
+  window.scrollTo(0,0);
+}
+
+function resetForm() {
+  document.getElementById('successScreen').style.display='none';
+  document.getElementById('formArea').style.display='block';
+  ['f-party','f-amount','f-ref','f-notes'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('f-paytype').value='';
+  document.getElementById('f-order').value='';
+  document.getElementById('f-expcat').value='';
+  onTypeChange();
+  var btn=document.getElementById('submitBtn'); btn.disabled=false; btn.textContent='Save payment';
+  window.scrollTo(0,0);
+}
+
+function showToast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); setTimeout(function(){t.classList.remove('on');},2500); }
+</script>
+</body>
+</html>
