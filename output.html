@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1D9E75">
+<title>Output Entry — Pivotaal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#1D9E75; --teal-l:#E1F5EE; --teal-d:#0F6E56;
+  --coral:#D85A30; --coral-l:#FAECE7;
+  --amber:#BA7517; --amber-l:#FAEEDA;
+  --bg:#F4F2EE; --card:#FFFFFF; --border:#E6E3DD;
+  --text:#1A1816; --text2:#4A4844; --text3:#8B8884;
+  --radius:14px; --radius-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+.header{background:linear-gradient(135deg,#0F6E56 0%,#1D9E75 100%);color:#fff;padding:18px 18px 20px;position:relative;overflow:hidden}
+.header::after{content:"";position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.08);border-radius:50%}
+.header-title{font-size:22px;font-weight:700;position:relative;z-index:1}
+.header-sub{font-size:13px;color:rgba(255,255,255,.7);margin-top:3px;position:relative;z-index:1}
+.body{padding:16px 14px 100px;max-width:520px;margin:0 auto}
+.card{background:var(--card);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.fg{margin-bottom:12px}
+.fl{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block}
+.fi,.fs{width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;background:#fff;color:var(--text)}
+.fi:focus,.fs:focus{outline:none;border-color:var(--teal)}
+.req{color:var(--coral);font-weight:700}
+.field-err{font-size:11px;color:var(--coral);margin-top:4px;display:none}
+.field-err.show{display:block}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.order-card{background:var(--teal-l);border:1.5px solid #BFE6D5;border-radius:12px;padding:12px;margin-bottom:10px;position:relative}
+.del-btn{position:absolute;top:6px;right:6px;background:rgba(216,90,48,.12);color:var(--coral);border:none;width:26px;height:26px;border-radius:50%;font-size:14px;cursor:pointer;font-weight:700}
+.add-row{width:100%;padding:11px;background:var(--teal-l);color:var(--teal-d);border:1.5px dashed var(--teal);border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;margin-top:6px}
+.btn-submit{width:100%;padding:15px;background:var(--teal);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;box-shadow:0 4px 12px rgba(29,158,117,.25)}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed}
+.process-toggle{display:flex;gap:6px;margin-top:5px}
+.pt-btn{flex:1;padding:9px;border:1.5px solid var(--border);background:#fff;color:var(--text2);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.pt-btn.on-iron{border-color:var(--amber);background:var(--amber-l);color:var(--amber)}
+.pt-btn.on-pack{border-color:var(--teal);background:var(--teal-l);color:var(--teal-d)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--text);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:all .25s;z-index:200}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.success{text-align:center;padding:30px 20px}
+.success-icon{font-size:60px;margin-bottom:10px}
+.success-title{font-size:20px;font-weight:700;color:var(--teal-d);margin-bottom:6px}
+.success-msg{font-size:13px;color:var(--text2);margin-bottom:18px}
+.btn-new{display:inline-block;padding:12px 22px;background:var(--teal);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none}
+.loading{text-align:center;padding:40px;color:var(--text3)}
+.spinner{display:inline-block;width:18px;height:18px;border:2.5px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.recent-btn{background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 12px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;position:relative;z-index:1">
+    <div>
+      <div class="header-title">📦 Output Entry</div>
+      <div class="header-sub">Daily finished output — Pivotaal</div>
+    </div>
+    <button onclick="openRecent()" class="recent-btn">📋 Recent</button>
+  </div>
+</div>
+
+<div class="body" id="bodyArea">
+  <div id="formArea">
+    <div id="loadingArea" class="loading"><div class="spinner"></div>Loading...</div>
+
+    <div id="mainForm" style="display:none">
+      <div class="card">
+        <div class="card-title">Entry header</div>
+        <div class="fg">
+          <label class="fl">Date <span class="req">*</span></label>
+          <input type="date" class="fi" id="f-date">
+        </div>
+        <div class="fg">
+          <label class="fl">Entered by <span class="req">*</span></label>
+          <select class="fs" id="f-enteredby"></select>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Output rows <span style="color:#9B9A96;font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">— add one row per order</span></div>
+        <div id="rowsArea"></div>
+        <button onclick="addRow()" class="add-row">+ Add another row</button>
+      </div>
+
+      <button id="submitBtn" class="btn-submit" onclick="submitForm()">Save Output Entries</button>
+    </div>
+  </div>
+
+  <div id="successScreen" style="display:none">
+    <div class="card success">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Saved!</div>
+      <div class="success-msg" id="successMsg">Output entries recorded.</div>
+      <button id="shareWaBtn" onclick="shareOnWhatsApp()" style="width:100%;padding:14px;background:#25D366;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(37,211,102,.3)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Share to Office Group
+      </button>
+      <button onclick="newEntry()" class="btn-new">+ New entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECENT MODAL -->
+<div id="recentModal" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:20px;padding-top:60px;overflow-y:auto">
+  <div style="background:#fff;border-radius:18px;width:100%;max-width:480px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden">
+    <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:17px;font-weight:700">Recent output entries</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Last 30 entries</div>
+      </div>
+      <button onclick="closeRecent()" style="background:var(--bg);border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;color:var(--text2)">×</button>
+    </div>
+    <div id="recentList" style="overflow-y:auto;padding:10px 14px 18px">
+      <div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMJUO-eXiq-2LrSZWELtTeEvGw-Ev2_XkH2vcKltKAGfva8qNkVDDNUL6FO8STH_Eubg/exec';
+var SECRET = 'pivotaal2025xyz';
+
+var master = {};
+var groupOrders = [];
+var ordersGrouped = [];
+var rowIdx = 0;
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  setTimeout(function(){ t.classList.remove('on'); }, 2400);
+}
+
+// JSONP fetcher with retry
+function fetchData(action, params) {
+  return new Promise(function(resolve, reject){
+    var cb = 'cb_' + Math.random().toString(36).substr(2,9);
+    var qs = 'key=' + SECRET + '&action=' + action + '&callback=' + cb;
+    if (params) {
+      Object.keys(params).forEach(function(k){
+        qs += '&' + k + '=' + encodeURIComponent(params[k]);
+      });
+    }
+    var script = document.createElement('script');
+    var timeout = setTimeout(function(){
+      cleanup();
+      reject(new Error('Timeout'));
+    }, 15000);
+    window[cb] = function(data) {
+      cleanup();
+      resolve(data);
+    };
+    function cleanup() {
+      clearTimeout(timeout);
+      try { delete window[cb]; } catch(e) {}
+      try { document.head.removeChild(script); } catch(e) {}
+    }
+    script.onerror = function(){ cleanup(); reject(new Error('Script error')); };
+    script.src = SCRIPT_URL + '?' + qs;
+    document.head.appendChild(script);
+  });
+}
+
+function postData(payload) {
+  payload.key = SECRET;
+  return fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload),
+  });
+}
+
+// LOAD DATA
+async function loadData() {
+  try {
+    master = await fetchData('masters');
+    ordersGrouped = await fetchData('ordersgrouped');
+    // Fallback for older deployment without ordersgrouped
+    if (!ordersGrouped || !ordersGrouped.length) {
+      groupOrders = await fetchData('grouporders');
+    }
+
+    // Default date today
+    var today = new Date();
+    var yyyy = today.getFullYear(), mm = String(today.getMonth()+1).padStart(2,'0'), dd = String(today.getDate()).padStart(2,'0');
+    document.getElementById('f-date').value = yyyy+'-'+mm+'-'+dd;
+
+    var eSel = document.getElementById('f-enteredby');
+    eSel.innerHTML = '<option value="">— select —</option>';
+    (master.teamMembers||[]).forEach(function(t){
+      var op = document.createElement('option');
+      op.value = t; op.textContent = t;
+      if (t.toLowerCase()==='neela') op.selected = true;
+      eSel.appendChild(op);
+    });
+
+    addRow();  // start with one row
+
+    document.getElementById('loadingArea').style.display='none';
+    document.getElementById('mainForm').style.display='block';
+  } catch(e) {
+    document.getElementById('loadingArea').innerHTML='<div style="color:var(--coral)">Failed to load. <button onclick="loadData()" style="color:var(--teal);background:none;border:none;font-weight:700;cursor:pointer">Retry</button></div>';
+  }
+}
+
+function addRow() {
+  rowIdx++;
+  var idx = rowIdx;
+  var div = document.createElement('div');
+  div.className = 'order-card';
+  div.dataset.idx = idx;
+
+  var orderOpts = '<option value="">— select order —</option>';
+  if (ordersGrouped && ordersGrouped.length) {
+    ordersGrouped.forEach(function(g){
+      (g.styles||[]).forEach(function(s){
+        var label = (g.groupOrderNo||'') + ' — ' + (g.client||'') + ' — ' + (s.name||'');
+        var clientEsc = String(g.client||'').replace(/"/g,'&quot;');
+        var dataAttr = ' data-group="'+(g.groupOrderNo||'')+'" data-style="'+(s.name||'').replace(/"/g,'&quot;')+'" data-client="'+clientEsc+'"';
+        orderOpts += '<option value="'+(s.orderNo||'')+'"'+dataAttr+'>'+label+'</option>';
+      });
+    });
+  } else {
+    (groupOrders||[]).forEach(function(g){
+      orderOpts += '<option value="'+g+'">'+g+'</option>';
+    });
+  }
+
+  div.innerHTML =
+    '<button class="del-btn" onclick="delRow('+idx+')" title="Remove">×</button>' +
+    '<div class="fg" style="margin-bottom:8px">' +
+      '<label class="fl">Order <span class="req">*</span></label>' +
+      '<select class="fs" id="r-order-'+idx+'" onchange="orderPicked('+idx+')">'+orderOpts+'</select>' +
+    '</div>' +
+    '<div class="fg" style="margin-bottom:8px">' +
+      '<label class="fl">Customer name</label>' +
+      '<input type="text" class="fi" id="r-customer-'+idx+'" placeholder="auto-fills from order, editable">' +
+    '</div>' +
+    '<div class="row-2">' +
+      '<div class="fg" style="margin-bottom:8px">' +
+        '<label class="fl">Output qty (pcs) <span class="req">*</span></label>' +
+        '<input type="number" inputmode="numeric" class="fi" id="r-qty-'+idx+'" placeholder="pcs" min="1">' +
+        '<input type="hidden" id="r-process-'+idx+'" value="Packing">' +
+      '</div>' +
+      '<div class="fg" style="margin-bottom:8px">' +
+        '<label class="fl">Selling price/pc</label>' +
+        '<input type="number" inputmode="decimal" class="fi" id="r-sp-'+idx+'" placeholder="₹ per pc (optional)" step="0.01" min="0">' +
+      '</div>' +
+    '</div>' +
+    '<div class="fg" style="margin-bottom:0">' +
+      '<label class="fl">Notes (optional)</label>' +
+      '<input type="text" class="fi" id="r-notes-'+idx+'" placeholder="any note">' +
+    '</div>';
+
+  document.getElementById('rowsArea').appendChild(div);
+  if (window.enhanceSelect) enhanceSelect('r-order-'+idx, '— select order —');
+}
+
+// When order is picked → fetch customer + SP from order data
+async function orderPicked(idx) {
+  var sel = document.getElementById('r-order-'+idx);
+  var opt = sel.selectedOptions[0];
+  if (!opt) return;
+  var customer = opt.dataset.client || '';
+  document.getElementById('r-customer-'+idx).value = customer;
+  // Try to fetch SP from server
+  var grp = opt.dataset.group || '';
+  if (grp) {
+    try {
+      var res = await fetchData('ordersp', {orderNo: grp});
+      if (res && res.sp > 0 && !document.getElementById('r-sp-'+idx).value) {
+        document.getElementById('r-sp-'+idx).value = res.sp;
+      }
+    } catch(e) {}
+  }
+}
+
+function delRow(idx) {
+  var rows = document.querySelectorAll('.order-card');
+  if (rows.length <= 1) { showToast('Need at least one row'); return; }
+  var row = document.querySelector('.order-card[data-idx="'+idx+'"]');
+  if (row) row.remove();
+}
+
+function setProcess_unused(idx, p) {
+  document.getElementById('r-process-'+idx).value = p;
+  var packBtn = document.getElementById('r-pack-'+idx);
+  var ironBtn = document.getElementById('r-iron-'+idx);
+  if (p==='Packing') {
+    packBtn.classList.add('on-pack'); packBtn.classList.remove('on-iron');
+    ironBtn.classList.remove('on-pack'); ironBtn.classList.remove('on-iron');
+    packBtn.style.cssText = 'flex:1;padding:9px;border:1.5px solid var(--teal);background:var(--teal-l);color:var(--teal-d);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit';
+    ironBtn.style.cssText = 'flex:1;padding:9px;border:1.5px solid var(--border);background:#fff;color:var(--text2);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit';
+  } else {
+    ironBtn.style.cssText = 'flex:1;padding:9px;border:1.5px solid var(--amber);background:var(--amber-l);color:var(--amber);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit';
+    packBtn.style.cssText = 'flex:1;padding:9px;border:1.5px solid var(--border);background:#fff;color:var(--text2);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit';
+  }
+}
+
+var lastSavedOutput = null;
+
+function fmtINR(n) {
+  n = Math.round(n||0);
+  return '₹' + n.toLocaleString('en-IN');
+}
+
+function buildOutputWA(d) {
+  var lines = [];
+  var totalQty = 0, totalValue = 0;
+  lines.push('📦 *OUTPUT ENTRY*');
+  lines.push('Pivotaal Branding Solutions');
+  lines.push('─────────────────────');
+  lines.push('Date: ' + d.date);
+  lines.push('─────────────────────');
+  lines.push('*Output rows:*');
+  d.rows.forEach(function(r, i) {
+    var label = (r.groupOrder ? r.groupOrder : r.orderNo) + (r.style ? ' — ' + r.style : '');
+    var value = (r.qty || 0) * (r.sellingPrice || 0);
+    totalQty   += (r.qty || 0);
+    totalValue += value;
+    lines.push((i+1) + '. ' + label);
+    if (r.customerName) lines.push('   Customer: ' + r.customerName);
+    lines.push('   ' + (r.process || 'Output') + ' · ' + r.qty + ' pcs' + (r.sellingPrice ? ' × ₹' + r.sellingPrice + ' = ' + fmtINR(value) : ''));
+    if (r.notes) lines.push('   Note: ' + r.notes);
+  });
+  lines.push('─────────────────────');
+  lines.push('Total Qty   : ' + totalQty + ' pcs');
+  if (totalValue > 0) lines.push('*Total Value : ' + fmtINR(totalValue) + '*');
+  lines.push('─────────────────────');
+  lines.push('Entered by: ' + d.enteredBy);
+  return lines.join('\n');
+}
+
+function shareOnWhatsApp() {
+  if (!lastSavedOutput) { showToast('No output to share'); return; }
+  var text = buildOutputWA(lastSavedOutput);
+  var url  = 'https://wa.me/?text=' + encodeURIComponent(text);
+  window.open(url, '_blank');
+}
+
+async function submitForm() {
+  var date = document.getElementById('f-date').value;
+  var contractor = '';  // Not used in this form
+  var enteredBy = document.getElementById('f-enteredby').value;
+
+  if (!date) { showToast('Pick a date'); return; }
+  if (!enteredBy) { showToast('Pick who is entering'); return; }
+
+  var rows = [];
+  var anyError = false;
+  document.querySelectorAll('.order-card').forEach(function(row){
+    var idx = row.dataset.idx;
+    var orderSel = document.getElementById('r-order-'+idx);
+    var orderNo = orderSel.value;
+    var optSel = orderSel.selectedOptions[0];
+    var groupOrder = optSel ? (optSel.dataset.group || '') : '';
+    var style = optSel ? (optSel.dataset.style || '') : '';
+    var customer = document.getElementById('r-customer-'+idx).value || '';
+    var sp = parseFloat(document.getElementById('r-sp-'+idx).value) || 0;
+    var process = document.getElementById('r-process-'+idx).value;
+    var qty = parseInt(document.getElementById('r-qty-'+idx).value) || 0;
+    var notes = document.getElementById('r-notes-'+idx).value || '';
+    if (!orderNo) { anyError = true; return; }
+    if (qty <= 0) { anyError = true; return; }
+    rows.push({
+      orderNo: orderNo, groupOrder: groupOrder, style: style,
+      process: process, qty: qty, notes: notes,
+      customerName: customer, sellingPrice: sp
+    });
+  });
+
+  if (rows.length === 0 || anyError) {
+    showToast('Fill all order + qty fields'); return;
+  }
+
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    var savedData = { date: date, contractor: contractor, enteredBy: enteredBy, rows: rows };
+    await postData({
+      type: 'output',
+      data: savedData
+    });
+    lastSavedOutput = savedData;
+    document.getElementById('formArea').style.display='none';
+    document.getElementById('successScreen').style.display='block';
+    document.getElementById('successMsg').textContent = rows.length + ' output entries recorded.';
+    window.scrollTo(0,0);
+  } catch(e) {
+    showToast('Failed — try again');
+    btn.disabled = false;
+    btn.textContent = 'Save Output Entries';
+  }
+}
+
+function newEntry() {
+  rowIdx = 0;
+  document.getElementById('rowsArea').innerHTML = '';
+  addRow();
+  document.getElementById('successScreen').style.display='none';
+  document.getElementById('formArea').style.display='block';
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('submitBtn').textContent = 'Save Output Entries';
+}
+
+// RECENT MODAL
+async function openRecent() {
+  document.getElementById('recentModal').style.display='flex';
+  document.getElementById('recentList').innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">Loading...</div>';
+  try {
+    var recent = await fetchData('recentoutput', {limit:30});
+    if (!recent || !recent.length) {
+      document.getElementById('recentList').innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">No output entries yet</div>';
+      return;
+    }
+    var html = '';
+    recent.forEach(function(r){
+      var icon = r.process==='Packing' ? '📦' : '🔥';
+      var processBg = r.process==='Packing' ? 'var(--teal-l)' : 'var(--amber-l)';
+      var processClr = r.process==='Packing' ? 'var(--teal-d)' : 'var(--amber)';
+      html += '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 12px;margin-bottom:6px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
+          '<div style="flex:1"><div style="font-weight:600;font-size:13px">'+icon+' '+(r.groupOrder||r.orderNo)+'</div>'+
+          '<div style="font-size:10px;color:var(--text3);margin-top:1px">'+(r.style||'')+' · '+r.date+'</div></div>'+
+          '<div style="text-align:right">'+
+            '<div style="font-family:DM Mono,monospace;font-weight:700;font-size:14px;color:'+processClr+'">'+r.qty+' pcs</div>'+
+            '<div style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;background:'+processBg+';color:'+processClr+';margin-top:2px;display:inline-block">'+r.process+'</div>'+
+          '</div>'+
+        '</div></div>';
+    });
+    document.getElementById('recentList').innerHTML = html;
+  } catch(e) {
+    document.getElementById('recentList').innerHTML = '<div style="text-align:center;padding:30px;color:var(--coral);font-size:13px">Failed to load</div>';
+  }
+}
+function closeRecent() { document.getElementById('recentModal').style.display='none'; }
+
+// INIT
+loadData();
+</script>
+<script src="searchable-select.js"></script>
+</body>
+</html>
