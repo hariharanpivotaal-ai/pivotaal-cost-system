@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1D9E75">
+<title>Output Entry — Pivotaal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#1D9E75; --teal-l:#E1F5EE; --teal-d:#0F6E56;
+  --coral:#D85A30; --coral-l:#FAECE7;
+  --amber:#BA7517; --amber-l:#FAEEDA;
+  --bg:#F4F2EE; --card:#FFFFFF; --border:#E6E3DD;
+  --text:#1A1816; --text2:#4A4844; --text3:#8B8884;
+  --radius:14px; --radius-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+.header{background:linear-gradient(135deg,#0F6E56 0%,#1D9E75 100%);color:#fff;padding:18px 18px 20px;position:relative;overflow:hidden}
+.header::after{content:"";position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.08);border-radius:50%}
+.header-title{font-size:22px;font-weight:700;position:relative;z-index:1}
+.header-sub{font-size:13px;color:rgba(255,255,255,.7);margin-top:3px;position:relative;z-index:1}
+.recent-btn{background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 12px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.body{padding:14px 14px 100px;max-width:560px;margin:0 auto}
+.card{background:var(--card);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.fg{margin-bottom:10px}
+.fl{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block}
+.fi,.fs{width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;background:#fff;color:var(--text)}
+.fi:focus,.fs:focus{outline:none;border-color:var(--teal)}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.search-wrap{position:relative;margin-bottom:14px}
+.search-wrap input{padding-left:36px}
+.search-wrap::before{content:"🔍";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.5}
+.pending-count{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px}
+.pending-count-txt{font-size:12px;font-weight:700;color:var(--text2)}
+.order-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:13px;margin-bottom:10px;transition:opacity .25s, transform .25s}
+.order-card.saved{opacity:0;transform:scale(.96);pointer-events:none}
+.order-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px}
+.order-name{font-weight:700;font-size:14.5px}
+.order-style{font-size:12px;color:var(--text2);margin-top:1px}
+.order-customer{font-size:11px;color:var(--text3);margin-top:2px}
+.age-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;margin-left:8px}
+.age-ok{background:var(--teal-l);color:var(--teal-d)}
+.age-warn{background:var(--amber-l);color:var(--amber)}
+.age-late{background:var(--coral-l);color:var(--coral)}
+.order-stats{display:flex;gap:14px;margin:9px 0;font-size:11px;color:var(--text3)}
+.order-stats b{color:var(--text2);font-weight:700}
+.entry-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end}
+.entry-row .fg{margin-bottom:0}
+.save-btn{padding:11px 14px;background:var(--teal);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.save-btn:disabled{opacity:.5;cursor:not-allowed}
+.empty-state{text-align:center;padding:50px 20px;color:var(--text3)}
+.empty-icon{font-size:44px;margin-bottom:10px}
+.header-bar{position:sticky;top:0;z-index:10}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--text);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:all .25s;z-index:200}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.loading{text-align:center;padding:40px;color:var(--text3)}
+.spinner{display:inline-block;width:18px;height:18px;border:2.5px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.session-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:12px 14px;display:none;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 -2px 10px rgba(0,0,0,.06);z-index:50}
+.session-bar.on{display:flex}
+.session-txt{font-size:12px;font-weight:700;color:var(--text2)}
+.session-share{background:#25D366;color:#fff;border:none;padding:10px 16px;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;position:relative;z-index:1">
+    <div>
+      <div class="header-title">📦 Output Entry</div>
+      <div class="header-sub">Pending orders — enter qty & save</div>
+    </div>
+    <button onclick="openRecent()" class="recent-btn">📋 Recent</button>
+  </div>
+</div>
+
+<div class="body">
+  <div class="card">
+    <div class="row-2">
+      <div class="fg">
+        <label class="fl">Date <span style="color:var(--coral)">*</span></label>
+        <input type="date" class="fi" id="f-date">
+      </div>
+      <div class="fg">
+        <label class="fl">Entered by <span style="color:var(--coral)">*</span></label>
+        <select class="fs" id="f-enteredby"></select>
+      </div>
+    </div>
+  </div>
+
+  <div id="loadingArea" class="loading"><div class="spinner"></div>Loading pending orders...</div>
+
+  <div id="listArea" style="display:none">
+    <div class="search-wrap">
+      <input type="text" class="fi" id="searchBox" placeholder="Search order no / style / customer" oninput="renderList()">
+    </div>
+    <div class="pending-count">
+      <div class="pending-count-txt" id="countTxt">0 pending</div>
+    </div>
+    <div id="cardsArea"></div>
+    <div id="emptyState" class="empty-state" style="display:none">
+      <div class="empty-icon">🎉</div>
+      <div style="font-weight:700;color:var(--text2)">All caught up!</div>
+      <div style="font-size:12px;margin-top:4px">No pending orders to output.</div>
+    </div>
+  </div>
+</div>
+
+<div class="session-bar" id="sessionBar">
+  <div class="session-txt" id="sessionTxt">0 saved</div>
+  <button class="session-share" onclick="shareSession()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Share
+  </button>
+</div>
+
+<!-- RECENT MODAL -->
+<div id="recentModal" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:20px;padding-top:60px;overflow-y:auto">
+  <div style="background:#fff;border-radius:18px;width:100%;max-width:480px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden">
+    <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:17px;font-weight:700">Recent output entries</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Last 30 entries</div>
+      </div>
+      <button onclick="closeRecent()" style="background:var(--bg);border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;color:var(--text2)">×</button>
+    </div>
+    <div id="recentList" style="overflow-y:auto;padding:10px 14px 18px">
+      <div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMJUO-eXiq-2LrSZWELtTeEvGw-Ev2_XkH2vcKltKAGfva8qNkVDDNUL6FO8STH_Eubg/exec';
+var SECRET = 'pivotaal2025xyz';
+
+var master = {};
+var pending = [];      // full pending list from server
+var sessionSaved = []; // entries saved this session (for WhatsApp summary)
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  setTimeout(function(){ t.classList.remove('on'); }, 2400);
+}
+
+function fetchData(action, params) {
+  return new Promise(function(resolve, reject){
+    var cb = 'cb_' + Math.random().toString(36).substr(2,9);
+    var qs = 'key=' + SECRET + '&action=' + action + '&callback=' + cb;
+    if (params) {
+      Object.keys(params).forEach(function(k){
+        qs += '&' + k + '=' + encodeURIComponent(params[k]);
+      });
+    }
+    var script = document.createElement('script');
+    var timeout = setTimeout(function(){ cleanup(); reject(new Error('Timeout')); }, 15000);
+    window[cb] = function(data) { cleanup(); resolve(data); };
+    function cleanup() {
+      clearTimeout(timeout);
+      try { delete window[cb]; } catch(e) {}
+      try { document.head.removeChild(script); } catch(e) {}
+    }
+    script.onerror = function(){ cleanup(); reject(new Error('Script error')); };
+    script.src = SCRIPT_URL + '?' + qs;
+    document.head.appendChild(script);
+  });
+}
+
+function postData(payload) {
+  payload.key = SECRET;
+  return fetch(SCRIPT_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload),
+  });
+}
+
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function daysSince(dateStr) {
+  if (!dateStr) return null;
+  var d1 = new Date(dateStr), d2 = new Date(todayStr());
+  return Math.round((d2-d1)/(1000*60*60*24));
+}
+
+async function loadData() {
+  try {
+    master = await fetchData('masters');
+    pending = await fetchData('pendingoutput') || [];
+
+    document.getElementById('f-date').value = todayStr();
+    var eSel = document.getElementById('f-enteredby');
+    eSel.innerHTML = '<option value="">— select —</option>';
+    (master.teamMembers||[]).forEach(function(t){
+      var op = document.createElement('option');
+      op.value = t; op.textContent = t;
+      if (t.toLowerCase()==='neela') op.selected = true;
+      eSel.appendChild(op);
+    });
+
+    document.getElementById('loadingArea').style.display='none';
+    document.getElementById('listArea').style.display='block';
+    renderList();
+  } catch(e) {
+    document.getElementById('loadingArea').innerHTML='<div style="color:var(--coral)">Failed to load. <button onclick="loadData()" style="color:var(--teal);background:none;border:none;font-weight:700;cursor:pointer">Retry</button></div>';
+  }
+}
+
+function renderList() {
+  var q = (document.getElementById('searchBox').value||'').toLowerCase().trim();
+  var filtered = pending.filter(function(o){
+    if (!q) return true;
+    return (o.orderNo+' '+o.groupOrder+' '+o.style+' '+o.client).toLowerCase().indexOf(q) >= 0;
+  });
+
+  document.getElementById('countTxt').textContent = pending.length + ' pending' + (q ? (' · ' + filtered.length + ' shown') : '');
+
+  var area = document.getElementById('cardsArea');
+  if (!filtered.length) {
+    area.innerHTML = '';
+    document.getElementById('emptyState').style.display = pending.length ? 'none' : 'block';
+    if (pending.length && q) {
+      area.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">No match for "'+q+'"</div>';
+    }
+    return;
+  }
+  document.getElementById('emptyState').style.display = 'none';
+
+  var html = '';
+  filtered.forEach(function(o, i){
+    var age = daysSince(o.orderDate);
+    var ageCls = 'age-ok', ageTxt = age!==null ? age+'d ago' : '';
+    if (age !== null) {
+      if (age >= 20) ageCls = 'age-late';
+      else if (age >= 10) ageCls = 'age-warn';
+    }
+    var safeId = 'p'+i;
+    html +=
+      '<div class="order-card" id="card-'+safeId+'" data-order="'+o.orderNo+'">' +
+        '<div class="order-top">' +
+          '<div>' +
+            '<div class="order-name">'+o.groupOrder+(o.client?' — '+o.client:'')+'</div>' +
+            '<div class="order-style">'+(o.style||'')+'</div>' +
+            (o.orderNo!==o.groupOrder ? '<div class="order-customer">Order #'+o.orderNo+'</div>' : '') +
+          '</div>' +
+          (ageTxt ? '<div class="age-badge '+ageCls+'">'+ageTxt+'</div>' : '') +
+        '</div>' +
+        '<div class="order-stats"><span>Order qty: <b>'+(o.orderQty||0)+'</b></span></div>' +
+        '<div class="entry-row">' +
+          '<div class="fg">' +
+            '<label class="fl">Output qty</label>' +
+            '<input type="number" inputmode="numeric" class="fi" id="qty-'+safeId+'" placeholder="pcs" min="1">' +
+          '</div>' +
+          '<div class="fg">' +
+            '<label class="fl">Selling price/pc</label>' +
+            '<input type="number" inputmode="decimal" class="fi" id="sp-'+safeId+'" placeholder="₹" step="0.01" min="0" value="'+(o.sellingPrice>0?o.sellingPrice:'')+'">' +
+          '</div>' +
+          '<button class="save-btn" id="btn-'+safeId+'" onclick="saveOne(\''+safeId+'\', '+i+')">Save</button>' +
+        '</div>' +
+      '</div>';
+  });
+  area.innerHTML = html;
+
+  // keep index map for filtered list
+  area.dataset.filteredIds = JSON.stringify(filtered.map(function(o){ return o.orderNo; }));
+}
+
+async function saveOne(safeId, filteredIdx) {
+  var q = (document.getElementById('searchBox').value||'').toLowerCase().trim();
+  var filtered = pending.filter(function(o){
+    if (!q) return true;
+    return (o.orderNo+' '+o.groupOrder+' '+o.style+' '+o.client).toLowerCase().indexOf(q) >= 0;
+  });
+  var order = filtered[filteredIdx];
+  if (!order) return;
+
+  var date = document.getElementById('f-date').value;
+  var enteredBy = document.getElementById('f-enteredby').value;
+  if (!date) { showToast('Pick a date'); return; }
+  if (!enteredBy) { showToast('Pick who is entering'); return; }
+
+  var qty = parseInt(document.getElementById('qty-'+safeId).value) || 0;
+  var sp = parseFloat(document.getElementById('sp-'+safeId).value) || 0;
+  if (qty <= 0) { showToast('Enter output qty'); return; }
+
+  var btn = document.getElementById('btn-'+safeId);
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  var row = {
+    orderNo: order.orderNo, groupOrder: order.groupOrder, style: order.style,
+    orderQty: order.orderQty, qty: qty, sellingPrice: sp,
+    customerName: order.client, notes: ''
+  };
+
+  try {
+    await postData({ type: 'output', data: { date: date, enteredBy: enteredBy, rows: [row] } });
+    sessionSaved.push(row);
+    updateSessionBar();
+    var card = document.getElementById('card-'+safeId);
+    card.classList.add('saved');
+    setTimeout(function(){
+      pending = pending.filter(function(o){ return o.orderNo !== order.orderNo; });
+      renderList();
+    }, 250);
+    showToast('Saved: '+order.groupOrder+' — '+qty+' pcs');
+  } catch(e) {
+    showToast('Failed — try again');
+    btn.disabled = false; btn.textContent = 'Save';
+  }
+}
+
+function updateSessionBar() {
+  var bar = document.getElementById('sessionBar');
+  if (!sessionSaved.length) { bar.classList.remove('on'); return; }
+  bar.classList.add('on');
+  var totalQty = sessionSaved.reduce(function(s,r){ return s+r.qty; }, 0);
+  document.getElementById('sessionTxt').textContent = sessionSaved.length + ' saved · ' + totalQty + ' pcs';
+}
+
+function fmtINR(n) {
+  n = Math.round(n||0);
+  return '₹' + n.toLocaleString('en-IN');
+}
+
+function shareSession() {
+  if (!sessionSaved.length) return;
+  var lines = [];
+  var totalQty = 0, totalValue = 0;
+  lines.push('📦 *OUTPUT ENTRY*');
+  lines.push('Pivotaal Branding Solutions');
+  lines.push('─────────────────────');
+  lines.push('Date: ' + document.getElementById('f-date').value);
+  lines.push('─────────────────────');
+  sessionSaved.forEach(function(r, i){
+    var label = (r.groupOrder||r.orderNo) + (r.style ? ' — ' + r.style : '');
+    var value = (r.qty||0) * (r.sellingPrice||0);
+    totalQty += r.qty||0; totalValue += value;
+    lines.push((i+1)+'. '+label);
+    if (r.customerName) lines.push('   Customer: '+r.customerName);
+    lines.push('   '+r.qty+' pcs'+(r.sellingPrice?' × ₹'+r.sellingPrice+' = '+fmtINR(value):''));
+  });
+  lines.push('─────────────────────');
+  lines.push('Total Qty   : ' + totalQty + ' pcs');
+  if (totalValue > 0) lines.push('*Total Value : ' + fmtINR(totalValue) + '*');
+  lines.push('─────────────────────');
+  lines.push('Entered by: ' + document.getElementById('f-enteredby').value);
+  var url = 'https://wa.me/?text=' + encodeURIComponent(lines.join('\n'));
+  window.open(url, '_blank');
+}
+
+// RECENT MODAL
+async function openRecent() {
+  document.getElementById('recentModal').style.display='flex';
+  document.getElementById('recentList').innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">Loading...</div>';
+  try {
+    var recent = await fetchData('recentoutput', {limit:30});
+    if (!recent || !recent.length) {
+      document.getElementById('recentList').innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">No output entries yet</div>';
+      return;
+    }
+    var html = '';
+    recent.forEach(function(r){
+      html += '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 12px;margin-bottom:6px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
+          '<div style="flex:1"><div style="font-weight:600;font-size:13px">📦 '+(r.groupOrder||r.orderNo)+'</div>'+
+          '<div style="font-size:10px;color:var(--text3);margin-top:1px">'+(r.style||'')+' · '+r.date+(r.daysToFinish!==''?' · '+r.daysToFinish+'d to finish':'')+'</div></div>'+
+          '<div style="text-align:right">'+
+            '<div style="font-family:DM Mono,monospace;font-weight:700;font-size:14px;color:var(--teal-d)">'+r.qty+' pcs</div>'+
+          '</div>'+
+        '</div></div>';
+    });
+    document.getElementById('recentList').innerHTML = html;
+  } catch(e) {
+    document.getElementById('recentList').innerHTML = '<div style="text-align:center;padding:30px;color:var(--coral);font-size:13px">Failed to load</div>';
+  }
+}
+function closeRecent() { document.getElementById('recentModal').style.display='none'; }
+
+loadData();
+</script>
+</body>
+</html>
