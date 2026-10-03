@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0F6E56">
+<title>Pivotaal — Voice Wage Entry</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#1D9E75;--teal-d:#0F6E56;--teal-l:#E1F5EE;
+  --coral:#D85A30;--coral-l:#FAECE7;
+  --amber:#BA7517;--amber-l:#FAEEDA;
+  --text:#1C1C1A;--text2:#6B6A66;--text3:#9B9A96;
+  --bg:#F4F7F5;--surface:#fff;
+  --border:#DDE8E4;--radius:16px;--radius-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,var(--teal-d) 0%,var(--teal) 100%);padding:18px 20px 24px;position:relative;overflow:hidden}
+.hdr::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,.06);border-radius:50%}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;position:relative;z-index:1}
+.logo{width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.hdr-title{font-size:20px;font-weight:700;color:#fff;position:relative;z-index:1}
+.hdr-sub{font-size:12px;color:rgba(255,255,255,.65);position:relative;z-index:1}
+.mode-toggle{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block}
+
+/* BODY */
+.body{padding:14px}
+
+/* CARD */
+.card{background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.card-title{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.card-title::before{content:'';width:3px;height:14px;background:var(--teal);border-radius:2px}
+
+/* VOICE FIELD */
+.vfield{margin-bottom:12px}
+.vlabel{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.vlabel .req{color:var(--coral)}
+.vinput-wrap{display:flex;align-items:center;gap:8px}
+.vinput{flex:1;padding:13px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surface);-webkit-appearance:none}
+.vinput:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(29,158,117,.1)}
+.vinput.listening{border-color:var(--coral);box-shadow:0 0 0 3px rgba(216,90,48,.15);animation:pulse-border 1s ease-in-out infinite}
+@keyframes pulse-border{0%,100%{box-shadow:0 0 0 3px rgba(216,90,48,.15)}50%{box-shadow:0 0 0 6px rgba(216,90,48,.08)}}
+.vinput.filled{border-color:var(--teal);background:var(--teal-l)}
+.mic-btn{width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:all .2s}
+.mic-btn.idle{background:var(--teal-l);color:var(--teal-d)}
+.mic-btn.active{background:var(--coral);color:#fff;animation:pulse-mic .6s ease-in-out infinite}
+@keyframes pulse-mic{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.mic-btn:disabled{opacity:.35;cursor:not-allowed;animation:none}
+
+/* VOICE STATUS BAR */
+.vbar{background:#1C1C1A;color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:500;text-align:center;margin-bottom:12px;min-height:42px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .3s}
+.vbar.listening{background:var(--coral)}
+.vbar.ok{background:var(--teal-d)}
+.vbar.warn{background:var(--amber)}
+.vbar-dot{width:8px;height:8px;border-radius:50%;background:currentColor;animation:blink .8s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ORDER ROW CARD */
+.ord-card{border:1.5px solid var(--border);border-radius:12px;padding:13px;margin-bottom:10px;position:relative;background:var(--bg)}
+.ord-card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ord-card-num{font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.5px}
+.ord-del-btn{width:28px;height:28px;border-radius:50%;border:none;background:var(--coral-l);color:var(--coral);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+.ord-amount-disp{background:var(--teal-l);color:var(--teal-d);font-size:14px;font-weight:700;padding:7px 12px;border-radius:8px;font-family:'DM Mono',monospace;text-align:center;margin-top:8px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+
+/* AUTOCOMPLETE */
+.ac-wrap{position:relative}
+.ac-list{position:absolute;top:calc(100% + 2px);left:0;right:0;background:#fff;border:1.5px solid var(--teal);border-radius:10px;max-height:220px;overflow-y:auto;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.ac-item{padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border)}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item.sel{background:var(--teal-l);color:var(--teal-d)}
+.ac-item mark{background:none;color:var(--teal-d);font-weight:700}
+
+/* SUMMARY BOX */
+.sum-box{background:var(--teal-l);border-radius:10px;padding:12px;margin-bottom:12px}
+.sum-row{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-bottom:1px solid rgba(29,158,117,.15)}
+.sum-row:last-child{border-bottom:none;font-size:16px;font-weight:700;padding-top:8px;margin-top:4px}
+.sum-lbl{color:var(--teal-d);font-weight:500}
+.sum-val{font-family:'DM Mono',monospace;font-weight:700}
+
+/* WEEK BADGE */
+.wk-badge{display:inline-block;background:var(--teal-l);color:var(--teal-d);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;margin-top:5px}
+
+/* ADVANCE SECTION */
+.adv-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+
+/* BUTTONS */
+.btn-p{width:100%;padding:15px;background:linear-gradient(135deg,var(--teal) 0%,var(--teal-d) 100%);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:8px;box-shadow:0 4px 14px rgba(15,110,86,.25)}
+.btn-p:disabled{opacity:.5;cursor:not-allowed}
+.btn-s{width:100%;padding:13px;background:var(--surface);color:var(--teal);border:2px solid var(--teal);border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:8px}
+.btn-add{width:100%;padding:11px;background:var(--surface);border:2px dashed var(--teal);border-radius:10px;color:var(--teal);font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:10px}
+.wa-btn{width:100%;padding:14px;background:#25D366;color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px}
+.wa-btn:disabled{opacity:.45;cursor:not-allowed}
+.wa-btn.amber{background:var(--amber)}
+
+/* VOUCHER (pre-approval) */
+.voucher{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.8}
+.v-co{font-size:13px;font-weight:700;text-align:center;color:var(--text)}
+.v-title{font-size:11px;color:var(--text3);text-align:center;margin-top:2px}
+.v-status{text-align:center;margin-top:6px;margin-bottom:10px}
+.v-badge-pending{display:inline-block;background:var(--coral-l);color:var(--coral);font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;border:1px solid var(--coral)}
+.v-badge-approved{display:inline-block;background:var(--teal-l);color:var(--teal-d);font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;border:1px solid var(--teal)}
+.v-divider{border:none;border-top:1px dashed var(--border);margin:8px 0}
+.v-meta-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0}
+.v-ml{color:var(--text2)}
+.v-mr{font-weight:600;color:var(--text)}
+.v-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px}
+.v-table th{text-align:left;padding:4px 5px;border-bottom:1px solid var(--border);color:var(--text2);font-weight:600}
+.v-table td{padding:4px 5px;border-bottom:1px dashed var(--border);color:var(--text)}
+.v-table .tr{text-align:right}
+.v-sum-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}
+.v-sum-row.total{font-weight:700;font-size:14px;border-top:1px solid var(--border);padding-top:6px;margin-top:4px}
+.v-footer{text-align:center;margin-top:10px;font-size:10px;color:var(--text3);border-top:1px dashed var(--border);padding-top:8px}
+
+/* STATUS BANNER */
+.status-banner{border-radius:14px;padding:20px 16px;text-align:center;margin-bottom:14px;transition:background .5s}
+.status-banner.pending{background:linear-gradient(135deg,#BA7517 0%,#8a5210 100%)}
+.status-banner.approved{background:linear-gradient(135deg,#1D9E75 0%,#0F6E56 100%)}
+.sb-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.sb-icon{font-size:40px;line-height:1;margin-bottom:8px}
+.sb-text{font-size:24px;font-weight:800;color:#fff;letter-spacing:.5px;line-height:1.1}
+.sb-sub{font-size:12px;color:rgba(255,255,255,.75);margin-top:8px;line-height:1.5}
+
+/* EDIT/DELETE badges */
+.edit-row-bar{display:flex;gap:6px;margin-top:8px}
+.edit-ord-btn{flex:1;padding:8px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text2)}
+.del-ord-btn{padding:8px 12px;border-radius:8px;border:1.5px solid var(--coral-l);background:var(--coral-l);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--coral)}
+
+/* TOAST */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1C1C1A;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+
+/* SPINNER */
+.spinner{width:32px;height:32px;border:3px solid var(--teal-l);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SELECT */
+.vsel{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surface);-webkit-appearance:none}
+.vsel:focus{outline:none;border-color:var(--teal)}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="logo">PB</div>
+    <a href="wages.html" class="mode-toggle">📋 Normal form</a>
+  </div>
+  <div class="hdr-title">🎤 Voice Wage Entry</div>
+  <div class="hdr-sub" id="hdrDate">Pivotaal Branding Solutions</div>
+</div>
+
+<div class="body">
+
+  <!-- LOADING -->
+  <div id="screenLoad" style="text-align:center;padding:40px 20px">
+    <div class="spinner"></div>
+    <div style="font-size:13px;color:var(--text3)">Loading data...</div>
+  </div>
+
+  <!-- ENTRY FORM -->
+  <div id="screenForm" style="display:none">
+
+    <!-- VOICE STATUS BAR -->
+    <div class="vbar" id="vbar">🎤 Tap a mic button to start voice input</div>
+
+    <!-- SETTLEMENT DETAILS -->
+    <div class="card">
+      <div class="card-title">Settlement details</div>
+
+      <!-- DATE -->
+      <div class="vfield">
+        <div class="vlabel">Settlement date <span class="req">*</span></div>
+        <div class="vinput-wrap">
+          <input type="date" class="vinput" id="f-date">
+          <button class="mic-btn idle" id="mic-date" onclick="voiceListen('date')" title="Say date">🎤</button>
+        </div>
+        <div class="wk-badge" id="weekBadge"></div>
+      </div>
+
+      <!-- CONTRACTOR -->
+      <div class="vfield">
+        <div class="vlabel">Contractor <span class="req">*</span></div>
+        <div class="vinput-wrap">
+          <div class="ac-wrap" style="flex:1">
+            <input type="text" class="vinput" id="f-contractor" placeholder="Type or say contractor name" autocomplete="off" oninput="acFilter('contractor',this.value)">
+            <div class="ac-list" id="ac-contractor" style="display:none"></div>
+          </div>
+          <button class="mic-btn idle" id="mic-contractor" onclick="voiceListen('contractor')" title="Say contractor">🎤</button>
+        </div>
+      </div>
+
+      <!-- PROCESS -->
+      <div class="vfield">
+        <div class="vlabel">Process <span class="req">*</span></div>
+        <div class="vinput-wrap">
+          <div class="ac-wrap" style="flex:1">
+            <input type="text" class="vinput" id="f-process" placeholder="Type or say process" autocomplete="off" oninput="acFilter('process',this.value)">
+            <div class="ac-list" id="ac-process" style="display:none"></div>
+          </div>
+          <button class="mic-btn idle" id="mic-process" onclick="voiceListen('process')" title="Say process">🎤</button>
+        </div>
+      </div>
+
+      <!-- ENTERED BY -->
+      <div class="vfield">
+        <div class="vlabel">Entered by <span class="req">*</span></div>
+        <select class="vsel" id="f-enteredby">
+          <option value="">— select —</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ORDER ROWS -->
+    <div class="card">
+      <div class="card-title">Order details</div>
+      <div id="orderRows"></div>
+      <button class="btn-add" onclick="addOrderRow()">+ Add order</button>
+    </div>
+
+    <!-- ADVANCE -->
+    <div class="card">
+      <div class="card-title">Advance deduction</div>
+      <div class="adv-row">
+        <div class="vfield" style="margin-bottom:0">
+          <div class="vlabel">Advance date</div>
+          <div class="vinput-wrap">
+            <input type="date" class="vinput" id="f-adv-date">
+            <button class="mic-btn idle" id="mic-adv-date" onclick="voiceListen('adv-date')" title="Say advance date">🎤</button>
+          </div>
+        </div>
+        <div class="vfield" style="margin-bottom:0">
+          <div class="vlabel">Advance amount (₹)</div>
+          <div class="vinput-wrap">
+            <input type="number" class="vinput" id="f-advance" placeholder="0" inputmode="numeric" oninput="updateSummary()">
+            <button class="mic-btn idle" id="mic-advance" onclick="voiceListen('advance')" title="Say advance amount">🎤</button>
+          </div>
+        </div>
+      </div>
+      <div class="vfield" style="margin-top:10px">
+        <div class="vlabel">Note (optional)</div>
+        <input type="text" class="vinput" id="f-note" placeholder="Any note or remark">
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="sum-box">
+      <div class="sum-row"><span class="sum-lbl">Gross wages</span><span class="sum-val" id="s-gross">₹0</span></div>
+      <div class="sum-row"><span class="sum-lbl">Advance deducted</span><span class="sum-val" id="s-advance">₹0</span></div>
+      <div class="sum-row"><span class="sum-lbl">Net payable</span><span class="sum-val" id="s-net">₹0</span></div>
+    </div>
+
+    <button class="btn-p" id="submitBtn" onclick="submitSettlement()">💾 Save & Generate Voucher</button>
+
+  </div><!-- end screenForm -->
+
+  <!-- VOUCHER / POST-SAVE SCREEN -->
+  <div id="screenVoucher" style="display:none">
+
+    <div class="status-banner pending" id="statusBanner">
+      <div class="sb-label">Voucher status</div>
+      <div class="sb-icon" id="sbIcon">⏳</div>
+      <div class="sb-text" id="sbText">NOT APPROVED</div>
+      <div class="sb-sub" id="sbSub">Send to Krishnan for approval. Heading will update once approved.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Payment Voucher</div>
+      <div class="voucher" id="voucherHtml"></div>
+
+      <!-- PRE-APPROVAL EDIT/DELETE AREA -->
+      <div id="editArea" style="margin-top:14px;padding-top:14px;border-top:1px dashed var(--border)">
+        <div style="font-size:11px;font-weight:700;color:var(--amber);letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px">✏️ Pre-approval edits</div>
+        <div id="editOrderCards"></div>
+        <button class="btn-s" onclick="goBackEdit()" style="margin-top:4px">✏️ Edit details / advance</button>
+      </div>
+
+      <!-- ACTIONS -->
+      <div style="margin-top:14px">
+        <button class="wa-btn amber" id="btnSendApproval" onclick="sendForApproval()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Send to Krishnan for Approval
+        </button>
+        <button class="wa-btn" id="btnShare" disabled onclick="shareApproved()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Share Approved Voucher
+        </button>
+        <button class="btn-s" onclick="printVoucher()">🖨️ Print / Download PDF</button>
+        <button class="btn-s" onclick="newSettlement()">+ New Settlement</button>
+      </div>
+    </div>
+  </div><!-- end screenVoucher -->
+
+</div><!-- body -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG (same backend as wages.html) ──────────────────
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMJUO-eXiq-2LrSZWELtTeEvGw-Ev2_XkH2vcKltKAGfva8qNkVDDNUL6FO8STH_Eubg/exec';
+var SECRET     = 'pivotaal2025xyz';
+var KRISHNAN_WA= '918015567788';
+
+// ─── STATE ────────────────────────────────────────────────
+var masterData   = {};
+var groupOrders  = [];
+var orderRowCount= 0;
+var savedBatch   = null;
+var pollTimer    = null;
+
+// autocomplete data
+var acData = { contractor:[], process:[] };
+var acSelected = { contractor:'', process:'' };
+
+// ─── INIT ─────────────────────────────────────────────────
+window.addEventListener('load', function(){
+  var today = new Date().toISOString().slice(0,10);
+  document.getElementById('f-date').value   = today;
+  document.getElementById('f-adv-date').value = today;
+  document.getElementById('hdrDate').textContent =
+    new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'});
+  updateWeekBadge(today);
+  document.getElementById('f-date').addEventListener('change', function(){ updateWeekBadge(this.value); });
+  loadDataWithRetry();
+
+  // close autocomplete on outside click
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.ac-wrap')) { closeAllAc(); }
+  });
+});
+
+function updateWeekBadge(d){
+  if(!d) return;
+  var dt=new Date(d), j=new Date(dt.getFullYear(),0,1);
+  var wk=Math.ceil(((dt-j)/86400000+j.getDay()+1)/7);
+  document.getElementById('weekBadge').textContent='Week '+wk+' — '+dt.getFullYear();
+}
+
+// ─── FETCH (JSONP, same as wages.html) ───────────────────
+function fetchData(action, params){
+  return new Promise(function(resolve,reject){
+    var cb='cb_'+action+'_'+Date.now()+'_'+Math.floor(Math.random()*1e5);
+    var s=document.createElement('script');
+    var url=SCRIPT_URL+'?key='+SECRET+'&action='+action+'&callback='+cb;
+    if(params) Object.keys(params).forEach(function(k){ url+='&'+k+'='+encodeURIComponent(params[k]); });
+    var clean=function(){ try{if(s.parentNode)s.parentNode.removeChild(s);}catch(e){} };
+    window[cb]=function(data){ try{delete window[cb];}catch(e){window[cb]=undefined;} clean(); resolve(data); };
+    s.onerror=function(){ try{delete window[cb];}catch(e){window[cb]=undefined;} clean(); reject(new Error('fail')); };
+    s.src=url;
+    (document.head||document.documentElement).appendChild(s);
+    setTimeout(function(){ if(window[cb]){ try{delete window[cb];}catch(e){window[cb]=undefined;} clean(); reject(new Error('timeout')); }},15000);
+  });
+}
+
+// ─── LOAD DATA ────────────────────────────────────────────
+async function loadDataWithRetry(n){
+  n=n||1;
+  try{ await loadData(); }
+  catch(e){
+    if(n<4) setTimeout(function(){ loadDataWithRetry(n+1); },1500);
+    else document.getElementById('screenLoad').innerHTML='<div style="color:var(--coral);padding:20px;text-align:center">Could not load.<br>Please refresh.</div>';
+  }
+}
+
+async function loadData(){
+  masterData  = await fetchData('masters');
+  var orders  = await fetchData('orders');
+
+  var seen={};
+  groupOrders=[];
+  orders.filter(function(o){ return o.Status==='Active'; }).forEach(function(o){
+    var grp   =String(o.GroupOrderNo||'').trim()||String(o.OrderNo||'').trim();
+    var client=String(o.Client||'').trim();
+    var style =String(o.Style||'').trim();
+    var label =grp+(client?' — '+client:'')+(style?' — '+style:'');
+    if(label&&!seen[label]){ seen[label]=true; groupOrders.push(label); }
+  });
+
+  acData.contractor = masterData.contractors||[];
+  acData.process    = masterData.processes||[];
+
+  // Entered by dropdown
+  var eb=document.getElementById('f-enteredby');
+  eb.innerHTML='<option value="">— select —</option>';
+  (masterData.teamMembers||[]).forEach(function(n){
+    var o=document.createElement('option'); o.value=n; o.textContent=n; eb.appendChild(o);
+  });
+  // default Jenith
+  for(var i=0;i<eb.options.length;i++){ if(eb.options[i].value==='Jenith'){ eb.selectedIndex=i; break; } }
+
+  document.getElementById('screenLoad').style.display='none';
+  document.getElementById('screenForm').style.display='block';
+  addOrderRow();
+}
+
+// ─── AUTOCOMPLETE ─────────────────────────────────────────
+function acFilter(field, val){
+  acSelected[field]='';
+  var list=document.getElementById('ac-'+field);
+  if(!val||val.length<1){ list.style.display='none'; return; }
+  var matches=acData[field].filter(function(x){ return x.toLowerCase().indexOf(val.toLowerCase())>=0; });
+  if(!matches.length){ list.style.display='none'; return; }
+  list.innerHTML=matches.map(function(m){
+    var hl=m.replace(new RegExp('('+escRe(val)+')','gi'),'<mark>$1</mark>');
+    return '<div class="ac-item" onclick="acPick(\''+field+'\',\''+escQ(m)+'\')">'+hl+'</div>';
+  }).join('');
+  list.style.display='block';
+}
+
+function acPick(field, val){
+  document.getElementById('f-'+field).value=val;
+  document.getElementById('ac-'+field).style.display='none';
+  acSelected[field]=val;
+  document.getElementById('f-'+field).classList.add('filled');
+  if(field==='contractor'){
+    // reload all cut qtys
+    document.querySelectorAll('.ord-row').forEach(function(r){
+      var idx=r.dataset.idx;
+      var sel=document.getElementById('ord-order-'+idx);
+      if(sel&&sel.value) loadCutQty(idx);
+    });
+  }
+}
+
+function closeAllAc(){
+  document.querySelectorAll('.ac-list').forEach(function(l){ l.style.display='none'; });
+}
+
+function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function escQ(s){ return s.replace(/'/g,"\\'"); }
+
+// ─── ORDER ROWS ───────────────────────────────────────────
+function addOrderRow(){
+  orderRowCount++;
+  var idx=orderRowCount;
+  var wrap=document.getElementById('orderRows');
+  var div=document.createElement('div');
+  div.className='ord-card'; div.dataset.idx=idx; div.id='ord-row-'+idx;
+
+  div.innerHTML=
+    '<div class="ord-card-hdr">'+
+      '<div class="ord-card-num">Order '+idx+'</div>'+
+      (idx>1?'<button class="ord-del-btn" onclick="removeOrderRow('+idx+')">×</button>':'')+
+    '</div>'+
+    // order search
+    '<div class="vfield" style="margin-bottom:8px">'+
+      '<div class="vlabel">Order no / customer / style <span class="req">*</span></div>'+
+      '<div class="vinput-wrap">'+
+        '<div class="ac-wrap" style="flex:1">'+
+          '<input type="text" class="vinput" id="ord-order-txt-'+idx+'" placeholder="Type or say order…" autocomplete="off" oninput="acOrderFilter('+idx+',this.value)">'+
+          '<div class="ac-list" id="ac-order-'+idx+'" style="display:none"></div>'+
+          '<input type="hidden" id="ord-order-'+idx+'">'+
+        '</div>'+
+        '<button class="mic-btn idle" id="mic-ord-order-'+idx+'" onclick="voiceListen(\'ord-order\','+idx+')" title="Say order">🎤</button>'+
+      '</div>'+
+      '<div style="margin-top:5px;font-size:11px;color:var(--text3)" id="ord-cutqty-badge-'+idx+'"></div>'+
+    '</div>'+
+    '<div class="three-col">'+
+      '<div class="vfield" style="margin-bottom:0">'+
+        '<div class="vlabel">Payable qty</div>'+
+        '<div class="vinput-wrap">'+
+          '<input type="number" class="vinput" id="ord-payable-'+idx+'" placeholder="0" inputmode="numeric" oninput="calcRow('+idx+')">'+
+          '<button class="mic-btn idle" id="mic-ord-qty-'+idx+'" onclick="voiceListen(\'ord-qty\','+idx+')" title="Say qty">🎤</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="vfield" style="margin-bottom:0">'+
+        '<div class="vlabel">Rate ₹/pc</div>'+
+        '<div class="vinput-wrap">'+
+          '<input type="number" class="vinput" id="ord-rate-'+idx+'" placeholder="0.00" inputmode="decimal" step="0.25" oninput="calcRow('+idx+')">'+
+          '<button class="mic-btn idle" id="mic-ord-rate-'+idx+'" onclick="voiceListen(\'ord-rate\','+idx+')" title="Say rate">🎤</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="vfield" style="margin-bottom:0">'+
+        '<div class="vlabel">Amount</div>'+
+        '<div class="ord-amount-disp" id="ord-amount-'+idx+'">₹0</div>'+
+      '</div>'+
+    '</div>'+
+    // payout type
+    '<div style="display:flex;gap:6px;margin-top:10px">'+
+      '<button type="button" id="po-final-'+idx+'" onclick="setPayout('+idx+',\'Final\')" style="flex:1;padding:9px;border:1.5px solid var(--teal);background:var(--teal-l);color:var(--teal-d);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">✓ Final</button>'+
+      '<button type="button" id="po-partial-'+idx+'" onclick="setPayout('+idx+',\'Partial\')" style="flex:1;padding:9px;border:1.5px solid var(--border);background:#fff;color:var(--text2);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⏳ Partial</button>'+
+    '</div>'+
+    '<input type="hidden" id="ord-payout-'+idx+'" value="Final">';
+
+  wrap.appendChild(div);
+}
+
+function setPayout(idx,type){
+  document.getElementById('ord-payout-'+idx).value=type;
+  var fb=document.getElementById('po-final-'+idx);
+  var pb=document.getElementById('po-partial-'+idx);
+  if(type==='Final'){
+    fb.style.cssText='flex:1;padding:9px;border:1.5px solid var(--teal);background:var(--teal-l);color:var(--teal-d);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit';
+    pb.style.cssText='flex:1;padding:9px;border:1.5px solid var(--border);background:#fff;color:var(--text2);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit';
+  } else {
+    pb.style.cssText='flex:1;padding:9px;border:1.5px solid var(--amber);background:var(--amber-l);color:var(--amber);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit';
+    fb.style.cssText='flex:1;padding:9px;border:1.5px solid var(--border);background:#fff;color:var(--text2);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit';
+  }
+}
+
+function removeOrderRow(idx){
+  var r=document.getElementById('ord-row-'+idx);
+  if(r) r.remove();
+  updateSummary();
+}
+
+// order autocomplete
+function acOrderFilter(idx, val){
+  document.getElementById('ord-order-'+idx).value='';
+  var list=document.getElementById('ac-order-'+idx);
+  if(!val||val.length<1){ list.style.display='none'; return; }
+  var lv=val.toLowerCase();
+  var matches=groupOrders.filter(function(x){ return x.toLowerCase().indexOf(lv)>=0; });
+  if(!matches.length){ list.style.display='none'; return; }
+  list.innerHTML=matches.slice(0,12).map(function(m){
+    var hl=m.replace(new RegExp('('+escRe(val)+')','gi'),'<mark>$1</mark>');
+    return '<div class="ac-item" onclick="acOrderPick('+idx+',\''+escQ(m)+'\')">'+hl+'</div>';
+  }).join('');
+  list.style.display='block';
+}
+
+function acOrderPick(idx, val){
+  document.getElementById('ord-order-txt-'+idx).value=val;
+  document.getElementById('ord-order-'+idx).value=val;
+  document.getElementById('ac-order-'+idx).style.display='none';
+  document.getElementById('ord-order-txt-'+idx).classList.add('filled');
+  loadCutQty(idx);
+  // auto-advance to qty field
+  setTimeout(function(){ document.getElementById('ord-payable-'+idx).focus(); },100);
+}
+
+async function loadCutQty(idx){
+  var fullLabel=document.getElementById('ord-order-'+idx).value;
+  var badge=document.getElementById('ord-cutqty-badge-'+idx);
+  if(!fullLabel){ badge.textContent=''; return; }
+  var groupNo=fullLabel.split('—')[0].trim();
+  var contractor=document.getElementById('f-contractor').value||'';
+  badge.textContent='Loading cut qty…';
+  try{
+    var data=await fetchData('cutqty',{contractor:contractor, order:groupNo});
+    var qty=data.cutQty||0;
+    badge.textContent='✂️ Cut qty: '+qty+' pcs';
+    badge.style.color='var(--blue)';
+  } catch(e){ badge.textContent=''; }
+}
+
+function calcRow(idx){
+  var qty=parseInt(document.getElementById('ord-payable-'+idx).value)||0;
+  var rt =parseFloat(document.getElementById('ord-rate-'+idx).value)||0;
+  document.getElementById('ord-amount-'+idx).textContent=fmtINR(Math.round(qty*rt));
+  updateSummary();
+}
+
+function updateSummary(){
+  var gross=0;
+  document.querySelectorAll('.ord-card').forEach(function(r){
+    var idx=r.dataset.idx;
+    var qty=parseInt(document.getElementById('ord-payable-'+idx).value)||0;
+    var rt =parseFloat(document.getElementById('ord-rate-'+idx).value)||0;
+    gross+=Math.round(qty*rt);
+  });
+  var adv=parseFloat(document.getElementById('f-advance').value)||0;
+  var net=Math.max(0,gross-adv);
+  document.getElementById('s-gross').textContent  =fmtINR(gross);
+  document.getElementById('s-advance').textContent=fmtINR(adv);
+  document.getElementById('s-net').textContent    =fmtINR(net);
+}
+
+// ─── VOICE INPUT (Web Speech API) ────────────────────────
+var recognition=null;
+var activeField=null;
+var activeIdx=null;
+var listening=false;
+
+function voiceListen(field, idx){
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){
+    showToast('Voice not supported in this browser. Use Chrome.');
+    return;
+  }
+  if(listening){ stopListen(); return; }
+  activeField=field; activeIdx=idx||null;
+
+  var SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SpeechRecognition();
+  recognition.lang='en-IN';
+  recognition.interimResults=false;
+  recognition.maxAlternatives=3;
+
+  recognition.onstart=function(){
+    listening=true;
+    setVbar('listening','🔴 Listening…');
+    setMicActive(field,idx,true);
+  };
+
+  recognition.onresult=function(e){
+    var results=e.results[0];
+    var transcript='';
+    for(var i=0;i<results.length;i++){ transcript=results[i].transcript; break; }
+    transcript=transcript.trim();
+    applyVoiceResult(field,idx,transcript);
+  };
+
+  recognition.onerror=function(e){
+    listening=false;
+    setMicActive(field,idx,false);
+    setVbar('warn','⚠️ '+(e.error==='not-allowed'?'Mic permission denied':e.error==='no-speech'?'No speech detected — try again':'Error: '+e.error));
+  };
+
+  recognition.onend=function(){
+    listening=false;
+    setMicActive(field,idx,false);
+  };
+
+  recognition.start();
+}
+
+function stopListen(){
+  if(recognition) recognition.stop();
+  listening=false;
+}
+
+function setMicActive(field,idx,active){
+  var micId=idx?'mic-'+field+'-'+idx:'mic-'+field;
+  var btn=document.getElementById(micId);
+  if(!btn) return;
+  btn.className='mic-btn '+(active?'active':'idle');
+}
+
+function setVbar(type,msg){
+  var b=document.getElementById('vbar');
+  b.className='vbar '+(type||'');
+  b.innerHTML=type==='listening'?'<span class="vbar-dot"></span> '+msg:msg;
+}
+
+function applyVoiceResult(field,idx,text){
+  var lc=text.toLowerCase().replace(/[.,!?]/g,'');
+  setVbar('ok','✓ Heard: "'+text+'"');
+  setTimeout(function(){ setVbar('','🎤 Tap a mic button for next field'); },3000);
+
+  if(field==='date'||field==='adv-date'){
+    var parsed=parseSpokenDate(lc)||new Date().toISOString().slice(0,10);
+    var fieldId=field==='adv-date'?'f-adv-date':'f-date';
+    document.getElementById(fieldId).value=parsed;
+    if(field==='date') updateWeekBadge(parsed);
+    document.getElementById(fieldId).classList.add('filled');
+    // auto advance to contractor
+    if(field==='date') setTimeout(function(){ voiceListen('contractor'); },500);
+    return;
+  }
+
+  if(field==='contractor'||field==='process'){
+    var candidates=acData[field];
+    var best=fuzzyMatch(lc,candidates);
+    if(best){
+      document.getElementById('f-'+field).value=best;
+      acSelected[field]=best;
+      document.getElementById('f-'+field).classList.add('filled');
+      document.getElementById('ac-'+field).style.display='none';
+      if(field==='contractor') setTimeout(function(){ voiceListen('process'); },500);
+    } else {
+      document.getElementById('f-'+field).value=text;
+      acFilter(field,text);
+      setVbar('warn','⚠️ No match for "'+text+'" — tap to select from list');
+    }
+    return;
+  }
+
+  if(field==='ord-order'){
+    var best2=fuzzyMatch(lc,groupOrders);
+    if(best2){
+      acOrderPick(idx,best2);
+      setTimeout(function(){ voiceListen('ord-qty',idx); },600);
+    } else {
+      document.getElementById('ord-order-txt-'+idx).value=text;
+      acOrderFilter(idx,text);
+      setVbar('warn','⚠️ No match for "'+text+'" — tap from list, then say qty');
+    }
+    return;
+  }
+
+  if(field==='ord-qty'){
+    var n=parseSpokenNumber(lc);
+    if(n!==null){
+      document.getElementById('ord-payable-'+idx).value=n;
+      calcRow(idx);
+      setTimeout(function(){ voiceListen('ord-rate',idx); },500);
+    } else { setVbar('warn','⚠️ Could not parse number from "'+text+'" — please type it'); }
+    return;
+  }
+
+  if(field==='ord-rate'){
+    var r=parseSpokenNumber(lc);
+    if(r!==null){
+      document.getElementById('ord-rate-'+idx).value=r;
+      calcRow(idx);
+      setVbar('ok','✓ Rate set to ₹'+r+' — tap "+ Add order" or say advance amount');
+    } else { setVbar('warn','⚠️ Could not parse rate from "'+text+'" — please type it'); }
+    return;
+  }
+
+  if(field==='advance'){
+    var av=parseSpokenNumber(lc);
+    if(av!==null){
+      document.getElementById('f-advance').value=av;
+      updateSummary();
+      setVbar('ok','✓ Advance set to ₹'+av);
+    } else { setVbar('warn','⚠️ Could not parse advance from "'+text+'" — please type it'); }
+    return;
+  }
+}
+
+// spoken date parser — handles "21 june", "today", "twenty first june" etc.
+function parseSpokenDate(s){
+  var now=new Date();
+  if(/\btoday\b/.test(s)) return now.toISOString().slice(0,10);
+  if(/\byesterday\b/.test(s)){ var y=new Date(now); y.setDate(y.getDate()-1); return y.toISOString().slice(0,10); }
+  var months={january:1,jan:1,february:2,feb:2,march:3,mar:3,april:4,apr:4,may:5,june:6,jun:6,july:7,jul:7,august:8,aug:8,september:9,sep:9,oct:10,october:10,november:11,nov:11,december:12,dec:12};
+  var words={'first':1,'second':2,'third':3,'fourth':4,'fifth':5,'sixth':6,'seventh':7,'eighth':8,'ninth':9,'tenth':10,'eleventh':11,'twelfth':12,'thirteenth':13,'fourteenth':14,'fifteenth':15,'sixteenth':16,'seventeenth':17,'eighteenth':18,'nineteenth':19,'twentieth':20,'twenty':20,'thirty':30};
+  var day=null, month=null;
+  // extract month
+  for(var m in months){ if(s.indexOf(m)>=0){ month=months[m]; break; } }
+  // extract day number
+  var numMatch=s.match(/\b(\d{1,2})\b/);
+  if(numMatch) day=parseInt(numMatch[1]);
+  if(!day){
+    for(var w in words){ if(s.indexOf(w)>=0){ day=words[w]; break; } }
+  }
+  if(day&&month){
+    var yr=now.getFullYear();
+    var dd=String(day).padStart(2,'0'), mm=String(month).padStart(2,'0');
+    return yr+'-'+mm+'-'+dd;
+  }
+  return null;
+}
+
+// number parser — handles "five hundred", "1500", "fifteen" etc.
+function parseSpokenNumber(s){
+  var n=parseFloat(s.replace(/[^0-9.]/g,''));
+  if(!isNaN(n)&&n>0) return n;
+  var words2={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100,thousand:1000};
+  var tokens=s.split(/\s+/);
+  var total=0, cur=0;
+  tokens.forEach(function(t){
+    var v=words2[t];
+    if(v===undefined) return;
+    if(v===100){ cur=cur?cur*100:100; }
+    else if(v===1000){ total+=(cur||1)*1000; cur=0; }
+    else { cur+=v; }
+  });
+  total+=cur;
+  return total>0?total:null;
+}
+
+// fuzzy match — find best candidate from list
+function fuzzyMatch(input, candidates){
+  var il=input.toLowerCase();
+  // exact
+  var ex=candidates.find(function(c){ return c.toLowerCase()===il; });
+  if(ex) return ex;
+  // starts with
+  var sw=candidates.find(function(c){ return c.toLowerCase().startsWith(il); });
+  if(sw) return sw;
+  // contains any word
+  var words=il.split(/\s+/);
+  var scored=candidates.map(function(c){
+    var cl=c.toLowerCase();
+    var score=words.reduce(function(acc,w){ return acc+(cl.indexOf(w)>=0?w.length:0); },0);
+    return {c:c,score:score};
+  }).filter(function(x){ return x.score>0; }).sort(function(a,b){ return b.score-a.score; });
+  return scored.length?scored[0].c:null;
+}
+
+// ─── SUBMIT ───────────────────────────────────────────────
+async function submitSettlement(){
+  var date    =document.getElementById('f-date').value;
+  var contractor=document.getElementById('f-contractor').value.trim();
+  var process =document.getElementById('f-process').value.trim();
+  var enteredBy=document.getElementById('f-enteredby').value;
+  var advDate =document.getElementById('f-adv-date').value;
+  var advance =parseFloat(document.getElementById('f-advance').value)||0;
+  var note    =document.getElementById('f-note').value.trim();
+
+  if(!date||!contractor||!process||!enteredBy){
+    showToast('Fill date, contractor, process and entered by'); return;
+  }
+
+  var orders=[];
+  var valid=true;
+  document.querySelectorAll('.ord-card').forEach(function(r){
+    var idx=r.dataset.idx;
+    var orderNo=document.getElementById('ord-order-'+idx).value;
+    var qty    =parseInt(document.getElementById('ord-payable-'+idx).value)||0;
+    var rate   =parseFloat(document.getElementById('ord-rate-'+idx).value)||0;
+    var payout =document.getElementById('ord-payout-'+idx).value||'Final';
+    var cutQtyEl=document.getElementById('ord-cutqty-'+idx);
+    var cutQty =cutQtyEl?parseInt(cutQtyEl.value)||0:0;
+    if(!orderNo||!qty||!rate){ valid=false; return; }
+    orders.push({orderNo:orderNo,payableQty:qty,rate:rate,payoutType:payout,cutQty:cutQty});
+  });
+
+  if(!valid||!orders.length){
+    showToast('Each order row needs order, qty and rate'); return;
+  }
+
+  var gross=orders.reduce(function(a,o){ return a+Math.round(o.payableQty*o.rate); },0);
+  var net  =Math.max(0,gross-advance);
+
+  var dt   =new Date(date);
+  var jan1 =new Date(dt.getFullYear(),0,1);
+  var week ='W'+Math.ceil(((dt-jan1)/86400000+jan1.getDay()+1)/7)+'-'+dt.getFullYear();
+
+  var btn=document.getElementById('submitBtn');
+  btn.disabled=true; btn.textContent='Saving…';
+
+  try{
+    var batchId=await fetchData('wages',{
+      date:date, week:week, contractor:contractor, process:process,
+      enteredBy:enteredBy, orders:JSON.stringify(orders),
+      advance:advance, advDate:advDate, note:note, gross:gross, net:net
+    });
+
+    savedBatch={
+      batchId:batchId||('WV-'+Date.now()),
+      date:date, week:week, contractor:contractor, process:process,
+      enteredBy:enteredBy, advDate:advDate,
+      orders:orders, advance:advance, gross:gross, net:net, note:note, status:'Pending', approvedBy:''
+    };
+
+    showVoucherScreen();
+  } catch(err){
+    savedBatch=null;
+    showToast('Error saving — try again');
+    btn.disabled=false; btn.textContent='💾 Save & Generate Voucher';
+  }
+}
+
+// ─── VOUCHER SCREEN ───────────────────────────────────────
+function showVoucherScreen(){
+  document.getElementById('screenForm').style.display   ='none';
+  document.getElementById('screenVoucher').style.display='block';
+  renderVoucher();
+  renderEditCards();
+  startPolling();
+  window.scrollTo(0,0);
+}
+
+function renderVoucher(){
+  if(!savedBatch) return;
+  var b=savedBatch;
+  var isPending=b.status!=='Approved';
+  var badgeHtml=isPending
+    ? '<div class="v-status"><span class="v-badge-pending">⛔ NOT APPROVED</span></div>'
+    : '<div class="v-status"><span class="v-badge-approved">✅ APPROVED BY KRISHNAN</span></div>';
+
+  var rows='';
+  b.orders.forEach(function(o,i){
+    var parts=(o.orderNo||'').split('—').map(function(s){return s.trim();});
+    var grp=parts[0]||'', sty=parts.slice(1).join(' — ');
+    var amt=Math.round(o.payableQty*o.rate);
+    var po=o.payoutType==='Partial'
+      ? '<span style="font-size:8px;font-weight:700;background:var(--amber-l);color:var(--amber);padding:1px 5px;border-radius:8px;margin-left:4px">PARTIAL</span>'
+      : '<span style="font-size:8px;font-weight:700;background:var(--teal-l);color:var(--teal-d);padding:1px 5px;border-radius:8px;margin-left:4px">FINAL</span>';
+    rows+='<tr>'+
+      '<td>'+(i+1)+'</td>'+
+      '<td><div style="font-weight:600">'+grp+po+'</div>'+(sty?'<div style="font-size:9px;color:var(--text3)">'+sty+'</div>':'')+'</td>'+
+      '<td class="tr">'+o.payableQty+' pcs</td>'+
+      '<td class="tr">₹'+o.rate+'</td>'+
+      '<td class="tr">'+fmtINR(amt)+'</td>'+
+    '</tr>';
+  });
+
+  document.getElementById('voucherHtml').innerHTML=
+    '<div class="v-co">PIVOTAAL BRANDING SOLUTIONS</div>'+
+    '<div class="v-title">Wage Payment Voucher</div>'+
+    badgeHtml+
+    '<hr class="v-divider">'+
+    '<div class="v-meta-row"><span class="v-ml">Contractor</span><span class="v-mr">'+b.contractor+'</span></div>'+
+    '<div class="v-meta-row"><span class="v-ml">Process</span><span class="v-mr">'+b.process+'</span></div>'+
+    '<div class="v-meta-row"><span class="v-ml">Settlement date</span><span class="v-mr">'+b.date+'</span></div>'+
+    '<div class="v-meta-row"><span class="v-ml">Week</span><span class="v-mr">'+b.week+'</span></div>'+
+    (b.advDate?'<div class="v-meta-row"><span class="v-ml">Advance date</span><span class="v-mr">'+b.advDate+'</span></div>':'')+
+    '<hr class="v-divider">'+
+    '<table class="v-table">'+
+      '<thead><tr><th>#</th><th>Order</th><th class="tr">Qty</th><th class="tr">Rate</th><th class="tr">Amount</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody>'+
+    '</table>'+
+    '<hr class="v-divider">'+
+    '<div class="v-sum-row"><span>Gross wages</span><span>'+fmtINR(b.gross)+'</span></div>'+
+    '<div class="v-sum-row"><span>Advance deducted</span><span>'+fmtINR(b.advance)+'</span></div>'+
+    (b.note?'<div class="v-sum-row"><span>Note</span><span>'+b.note+'</span></div>':'')+
+    '<div class="v-sum-row total"><span>Net payable</span><span>'+fmtINR(b.net)+'</span></div>'+
+    '<div class="v-footer">Entered by: '+b.enteredBy+' &nbsp;|&nbsp; Pivotaal Branding Solutions, Tirupur</div>';
+
+  // update banner
+  var banner=document.getElementById('statusBanner');
+  var icon=document.getElementById('sbIcon');
+  var txt=document.getElementById('sbText');
+  var sub=document.getElementById('sbSub');
+  if(b.status==='Approved'){
+    banner.className='status-banner approved';
+    icon.textContent='✅';
+    txt.textContent='APPROVED BY KRISHNAN';
+    sub.textContent='Voucher approved. Share payment advice to contractor now.';
+    document.getElementById('editArea').style.display='none';
+    document.getElementById('btnShare').disabled=false;
+    document.getElementById('btnSendApproval').style.display='none';
+  } else {
+    banner.className='status-banner pending';
+    icon.textContent='⛔';
+    txt.textContent='NOT APPROVED';
+    sub.textContent='Send to Krishnan for approval. Heading updates automatically once approved.';
+  }
+}
+
+function renderEditCards(){
+  if(!savedBatch) return;
+  var html='';
+  savedBatch.orders.forEach(function(o,i){
+    var idx=i+1;
+    var parts=(o.orderNo||'').split('—').map(function(s){return s.trim();});
+    var label=parts.join(' — ');
+    var amt=Math.round(o.payableQty*o.rate);
+    html+='<div style="border:1px solid var(--border);border-radius:9px;padding:10px;margin-bottom:7px;background:#fff">'+
+      '<div style="font-size:12px;font-weight:600;margin-bottom:4px">'+label+'</div>'+
+      '<div style="font-size:12px;color:var(--text2)">'+o.payableQty+' pcs × ₹'+o.rate+' = '+fmtINR(amt)+'</div>'+
+      '<div class="edit-row-bar">'+
+        '<button class="edit-ord-btn" onclick="editOrderRow('+i+')">✏️ Edit qty/rate</button>'+
+        '<button class="del-ord-btn" onclick="deleteOrderRow('+i+')">🗑️ Remove</button>'+
+      '</div>'+
+    '</div>';
+  });
+  document.getElementById('editOrderCards').innerHTML=html;
+}
+
+function editOrderRow(i){
+  var o=savedBatch.orders[i];
+  var newQty=prompt('Edit payable qty for order '+(i+1)+':', o.payableQty);
+  if(newQty===null) return;
+  var newRate=prompt('Edit rate (₹/pc):', o.rate);
+  if(newRate===null) return;
+  var q=parseInt(newQty)||o.payableQty;
+  var r=parseFloat(newRate)||o.rate;
+  savedBatch.orders[i].payableQty=q;
+  savedBatch.orders[i].rate=r;
+  recalcBatch();
+  renderVoucher();
+  renderEditCards();
+  showToast('Order '+(i+1)+' updated');
+}
+
+function deleteOrderRow(i){
+  if(!confirm('Remove order '+(i+1)+' from this voucher?')) return;
+  savedBatch.orders.splice(i,1);
+  recalcBatch();
+  renderVoucher();
+  renderEditCards();
+  showToast('Order removed');
+}
+
+function recalcBatch(){
+  savedBatch.gross=savedBatch.orders.reduce(function(a,o){ return a+Math.round(o.payableQty*o.rate); },0);
+  savedBatch.net=Math.max(0,savedBatch.gross-savedBatch.advance);
+}
+
+function goBackEdit(){
+  // reload form with current data
+  document.getElementById('f-date').value    =savedBatch.date||'';
+  document.getElementById('f-contractor').value=savedBatch.contractor||'';
+  document.getElementById('f-process').value  =savedBatch.process||'';
+  document.getElementById('f-adv-date').value =savedBatch.advDate||'';
+  document.getElementById('f-advance').value  =savedBatch.advance||'';
+  document.getElementById('f-note').value     =savedBatch.note||'';
+  updateSummary();
+  document.getElementById('screenVoucher').style.display='none';
+  document.getElementById('screenForm').style.display='block';
+  window.scrollTo(0,0);
+  showToast('Edit details, then save again');
+}
+
+// ─── APPROVAL POLLING ────────────────────────────────────
+function startPolling(){
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer=setInterval(async function(){
+    if(!savedBatch||savedBatch.status==='Approved') return;
+    try{
+      var data=await fetchData('settlement',{batchId:savedBatch.batchId});
+      if(data&&data.status==='Approved'){
+        savedBatch.status='Approved';
+        savedBatch.approvedBy=data.approvedBy||'Krishnan';
+        clearInterval(pollTimer);
+        renderVoucher();
+        showToast('✅ Approved by Krishnan! Ready to share.');
+      }
+    } catch(e){}
+  },30000);
+}
+
+// ─── SHARE / PRINT ────────────────────────────────────────
+function sendForApproval(){
+  if(!savedBatch){ showToast('No voucher to send'); return; }
+  var lines=[];
+  lines.push('*WAGE APPROVAL REQUEST*');
+  lines.push('Pivotaal Branding Solutions');
+  lines.push('─────────────────────');
+  lines.push('Contractor : '+savedBatch.contractor);
+  lines.push('Process    : '+savedBatch.process);
+  lines.push('Date       : '+savedBatch.date);
+  lines.push('Advance date: '+(savedBatch.advDate||'—'));
+  lines.push('─────────────────────');
+  savedBatch.orders.forEach(function(o,i){
+    var parts=(o.orderNo||'').split('—').map(function(s){return s.trim();});
+    var label=parts[0]+(parts.length>1?' — '+parts.slice(1).join(' — '):'');
+    var amt=Math.round(o.payableQty*o.rate);
+    lines.push((i+1)+'. '+label+' ['+o.payoutType.toUpperCase()+']');
+    lines.push('   '+o.payableQty+' pcs × ₹'+o.rate+' = '+fmtINR(amt));
+  });
+  lines.push('─────────────────────');
+  lines.push('Gross wages       : '+fmtINR(savedBatch.gross));
+  lines.push('Advance deducted  : '+fmtINR(savedBatch.advance));
+  lines.push('*Net payable      : '+fmtINR(savedBatch.net)+'*');
+  if(savedBatch.note) lines.push('Note: '+savedBatch.note);
+  lines.push('─────────────────────');
+  lines.push('⛔ *NOT APPROVED*');
+  lines.push('Kindly approve at: cost.pivotaal.in/admin.html');
+  window.open('https://wa.me/'+KRISHNAN_WA+'?text='+encodeURIComponent(lines.join('\n')),'_blank');
+}
+
+function shareApproved(){
+  if(!savedBatch||savedBatch.status!=='Approved'){ showToast('Not yet approved'); return; }
+  var lines=[];
+  lines.push('*WAGE PAYMENT ADVICE*');
+  lines.push('Pivotaal Branding Solutions');
+  lines.push('─────────────────────');
+  lines.push('Contractor : '+savedBatch.contractor);
+  lines.push('Process    : '+savedBatch.process);
+  lines.push('Date       : '+savedBatch.date);
+  lines.push('Advance date: '+(savedBatch.advDate||'—'));
+  lines.push('─────────────────────');
+  savedBatch.orders.forEach(function(o,i){
+    var parts=(o.orderNo||'').split('—').map(function(s){return s.trim();});
+    var label=parts[0]+(parts.length>1?' — '+parts.slice(1).join(' — '):'');
+    var amt=Math.round(o.payableQty*o.rate);
+    lines.push((i+1)+'. '+label+' ['+o.payoutType.toUpperCase()+']');
+    lines.push('   '+o.payableQty+' pcs × ₹'+o.rate+' = '+fmtINR(amt));
+  });
+  lines.push('─────────────────────');
+  lines.push('Gross wages       : '+fmtINR(savedBatch.gross));
+  lines.push('Advance deducted  : '+fmtINR(savedBatch.advance));
+  lines.push('*Net payable      : '+fmtINR(savedBatch.net)+'*');
+  if(savedBatch.note) lines.push('Note: '+savedBatch.note);
+  lines.push('─────────────────────');
+  lines.push('✅ *APPROVED BY KRISHNAN*');
+  lines.push('Pivotaal Branding Solutions, Tirupur');
+  window.open('https://wa.me/?text='+encodeURIComponent(lines.join('\n')),'_blank');
+}
+
+function printVoucher(){
+  var html=document.getElementById('voucherHtml').innerHTML;
+  var w=window.open('','_blank','width=400,height=600');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Wage Voucher</title>'+
+    '<style>body{font-family:Arial,sans-serif;font-size:12px;padding:20px;max-width:400px;margin:0 auto}'+
+    '.v-co{font-size:14px;font-weight:700;text-align:center}.v-title{font-size:11px;text-align:center;color:#666;margin-bottom:8px}'+
+    '.v-status{text-align:center;margin-bottom:10px}'+
+    '.v-badge-pending{display:inline-block;background:#FAECE7;color:#D85A30;font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;border:1px solid #D85A30}'+
+    '.v-badge-approved{display:inline-block;background:#E1F5EE;color:#0F6E56;font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;border:1px solid #0F6E56}'+
+    'hr{border:none;border-top:1px dashed #ccc;margin:8px 0}'+
+    '.v-meta-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0}'+
+    '.v-ml{color:#666}.v-mr{font-weight:600}'+
+    '.v-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px}'+
+    '.v-table th{text-align:left;padding:4px 5px;border-bottom:1px solid #ddd;color:#666}'+
+    '.v-table td{padding:4px 5px;border-bottom:1px dashed #eee}.tr{text-align:right}'+
+    '.v-sum-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}'+
+    '.v-sum-row.total{font-weight:700;font-size:14px;border-top:1px solid #ccc;padding-top:6px;margin-top:4px}'+
+    '.v-footer{text-align:center;margin-top:10px;font-size:10px;color:#999;border-top:1px dashed #ddd;padding-top:8px}'+
+    '@media print{body{padding:0}}</style></head><body>'+html+'</body></html>');
+  w.document.close();
+  setTimeout(function(){ w.print(); },400);
+}
+
+function newSettlement(){
+  if(pollTimer) clearInterval(pollTimer);
+  savedBatch=null; orderRowCount=0;
+  document.getElementById('screenVoucher').style.display='none';
+  document.getElementById('screenForm').style.display='block';
+  document.getElementById('orderRows').innerHTML='';
+  document.getElementById('f-contractor').value='';
+  document.getElementById('f-process').value='';
+  document.getElementById('f-advance').value='';
+  document.getElementById('f-note').value='';
+  document.getElementById('f-adv-date').value=new Date().toISOString().slice(0,10);
+  acSelected={contractor:'',process:''};
+  updateSummary();
+  addOrderRow();
+  window.scrollTo(0,0);
+  document.getElementById('submitBtn').disabled=false;
+  document.getElementById('submitBtn').textContent='💾 Save & Generate Voucher';
+  setVbar('','🎤 Tap a mic button to start voice input');
+}
+
+// ─── HELPERS ──────────────────────────────────────────────
+function fmtINR(n){ return '₹'+Math.round(n).toLocaleString('en-IN'); }
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('on');
+  setTimeout(function(){ t.classList.remove('on'); },3000);
+}
+</script>
+</body>
+</html>
